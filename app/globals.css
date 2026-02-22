@@ -1,26 +1,229 @@
 @import "tailwindcss";
+@import "katex/dist/katex.min.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:where(.dark, .dark *));
 
+/* ============================================================
+   ACRM Design System — Tailwind v4 Theme
+   ============================================================ */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* ACRM Palette */
+  --color-acrm-primary: #0FA697;
+  --color-acrm-accent: #AED911;
+  --color-acrm-warning: #D9CD2B;
+  --color-acrm-surface: #F2C094;
+  --color-acrm-danger: #D91A1A;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ---- Light Mode (default) ---- */
+:root {
+  --background: #FDF6EE;
+  --foreground: #1a1a1a;
+  --card-bg: rgba(255, 255, 255, 0.6);
+  --card-border: #f3f4f6;
+  --surface-hover: #f9fafb;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --input-bg: #ffffff;
+  --input-border: #e5e7eb;
+  --sidebar-bg: #faf5ef;
+  --toast-bg: rgba(255, 255, 255, 0.95);
+  --chart-grid: #f0f0f0;
+}
+
+/* ---- Dark Mode ---- */
+.dark {
+  --background: #0f1117;
+  --foreground: #e8e8e8;
+  --card-bg: rgba(30, 33, 44, 0.7);
+  --card-border: #2a2d3a;
+  --surface-hover: #1e212c;
+  --text-primary: #e8e8e8;
+  --text-secondary: #9ca3af;
+  --text-tertiary: #6b7280;
+  --input-bg: #1a1d27;
+  --input-border: #2a2d3a;
+  --sidebar-bg: #13151d;
+  --toast-bg: rgba(30, 33, 44, 0.95);
+  --chart-grid: #2a2d3a;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ---- Dark mode overrides for common Tailwind classes ---- */
+.dark .bg-white,
+.dark .bg-white\/40,
+.dark .bg-white\/50,
+.dark .bg-white\/60,
+.dark .bg-white\/70,
+.dark .bg-white\/80,
+.dark .bg-white\/90 {
+  background: var(--card-bg) !important;
+}
+
+.dark .border-gray-100,
+.dark .border-gray-200 {
+  border-color: var(--card-border) !important;
+}
+
+.dark .bg-gray-50,
+.dark .bg-gray-50\/80,
+.dark .bg-gray-100,
+.dark .bg-gray-100\/60 {
+  background: var(--surface-hover) !important;
+}
+
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-700 {
+  color: var(--text-primary) !important;
+}
+
+.dark .text-gray-600,
+.dark .text-gray-500,
+.dark .text-gray-400 {
+  color: var(--text-secondary) !important;
+}
+
+/* Note: We do NOT override text-gray-300 or lighter, as they are usually visible on dark backgrounds already. 
+   Overriding them to text-tertiary often reduces variation/contrast. */
+
+.dark input,
+.dark textarea,
+.dark select {
+  background: var(--input-bg) !important;
+  border-color: var(--input-border) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ---- Markdown + Math rendering ---- */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25rem 0;
+}
+
+.katex {
+  font-size: 1em;
+}
+
+/* ---- Custom Scrollbar ---- */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #d4c4b0;
+  border-radius: 999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #b8a694;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #3a3d4a;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #4a4d5a;
+}
+
+/* ---- Animations ---- */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+/* ---- Fade-up with initial opacity:0 (supports animationDelay) ---- */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.anim-fade-up {
+  opacity: 0;
+  animation: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ---- Selection colours ---- */
+::selection {
+  background: #0FA697;
+  color: white;
+}
+
+/* ---- Responsive Utilities ---- */
+@media (max-width: 768px) {
+  .sidebar-responsive {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    width: 100%;
+    max-width: 380px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar-responsive.sidebar-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+  }
 }

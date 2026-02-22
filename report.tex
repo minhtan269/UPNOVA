@@ -1,0 +1,802 @@
+\documentclass[12pt,a4paper]{article}
+
+% ---- Packages ----
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+% ---- Colors ----
+\definecolor{brand}{HTML}{0FA697}
+\definecolor{green2}{HTML}{AED911}
+\definecolor{codebg}{HTML}{F8FAFC}
+\definecolor{darktext}{HTML}{1F2937}
+
+% ---- Hyperlinks ----
+\hypersetup{
+    colorlinks=true,
+    linkcolor=brand,
+    urlcolor=brand,
+    citecolor=brand,
+}
+
+% ---- Code listings ----
+\lstset{
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    rulecolor=\color{brand},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    keywordstyle=\color{brand}\bfseries,
+    commentstyle=\color{gray},
+    stringstyle=\color{green2},
+}
+
+% ---- Header/Footer ----
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{brand}{ACRM — AI Carbon-Resilience Management}}
+\fancyhead[R]{\small\thepage}
+\fancyfoot[C]{\small\textcolor{gray}{Báo cáo chi tiết Core Project}}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ---- Title formatting ----
+\titleformat{\section}{\Large\bfseries\color{brand}}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\large\bfseries\color{darktext}}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{darktext}}{\thesubsubsection.}{0.5em}{}
+
+% ============================================================
+\begin{document}
+
+% ---- Title Page ----
+\begin{titlepage}
+    \centering
+    \vspace*{3cm}
+
+    {\Huge\bfseries\textcolor{brand}{ACRM}}\\[0.5cm]
+    {\LARGE AI Carbon-Resilience Management}\\[1.5cm]
+    {\Large Báo Cáo Chi Tiết Core Project}\\[0.5cm]
+    {\large Phân tích chức năng từng module}\\[3cm]
+
+    \begin{tabular}{ll}
+        \textbf{Framework:}  & Next.js 16 (React 19, TypeScript) \\
+        \textbf{State:}      & Zustand với persist middleware \\
+        \textbf{AI API:}     & Google Gemini REST API \\
+        \textbf{PDF:}        & jsPDF + QRCode \\
+        \textbf{Charts:}     & Recharts \\
+        \textbf{Ngày:}       & \today \\
+    \end{tabular}
+
+    \vfill
+    {\small Tài liệu nội bộ — Dự án ACRM}
+\end{titlepage}
+
+% ---- Table of Contents ----
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{Tổng Quan Kiến Trúc}
+% ============================================================
+
+ACRM (AI Carbon-Resilience Management) là một nền tảng web cho phép người dùng chat với nhiều model AI (Google Gemini, OpenAI GPT, Anthropic Claude) đồng thời đo lường phát thải carbon theo thời gian thực cho mỗi tin nhắn.
+
+Kiến trúc được thiết kế theo \textbf{4 tầng (layer)}:
+
+\begin{enumerate}[leftmargin=2cm]
+    \item \textbf{Data Collection} — Thu thập metadata AI: token, model, thời gian xử lý
+    \item \textbf{Carbon Calculation} — Tính toán năng lượng và CO\textsubscript{2} từ metadata
+    \item \textbf{Smart Optimization} — Gợi ý model tối ưu, dự báo carbon, lập lịch xanh
+    \item \textbf{Assessment \& Reporting} — Đánh giá resilience, báo cáo GHG, xuất PDF
+\end{enumerate}
+
+\subsection{Cấu trúc thư mục}
+
+\begin{itemize}[leftmargin=1.5cm]
+    \item \texttt{lib/} — 13 module logic core (tính toán, API, state management)
+    \item \texttt{components/} — 16 React component giao diện
+    \item \texttt{app/} — 4 trang Next.js (Landing, Chat, Compare, Team)
+\end{itemize}
+
+% ============================================================
+\section{Tầng 1 — Data Collection (Thu Thập Dữ Liệu)}
+% ============================================================
+
+% ---- 2.1 ----
+\subsection{carbon-constants.ts — Hằng Số \& Định Nghĩa Model}
+
+File này là \textbf{nguồn dữ liệu duy nhất (single source of truth)} cho toàn bộ hệ thống tính toán carbon.
+
+\subsubsection{Carbon Intensity mặc định}
+
+\begin{lstlisting}[language=Java]
+CARBON_INTENSITY = 445 // gCO2/kWh, IEA Global Average 2024
+\end{lstlisting}
+
+Giá trị 445 gCO\textsubscript{2}/kWh là trung bình toàn cầu theo báo cáo IEA 2024, được sử dụng khi không có dữ liệu live từ API.
+
+\subsubsection{Energy Coefficients (Hệ số năng lượng)}
+
+Mỗi class model tiêu thụ năng lượng khác nhau trên 1000 token:
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Model Class} & \textbf{kWh / 1K tokens} & \textbf{Ví dụ} \\
+        \midrule
+        Small  & 0.0007 & Gemini Flash \\
+        Medium & 0.0012 & GPT-3.5 Turbo, Claude Haiku \\
+        Large  & 0.0045 & Gemini Pro, GPT-4 Turbo, Claude Opus \\
+        \bottomrule
+    \end{tabular}
+    \caption{Energy Coefficients theo model class}
+\end{table}
+
+\subsubsection{AVAILABLE\_MODELS — 7 Model AI}
+
+Hệ thống hỗ trợ 7 model từ 3 nhà cung cấp:
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{llllr}
+        \toprule
+        \textbf{ID} & \textbf{Provider} & \textbf{Class} & \textbf{API thực} & \textbf{J/token} \\
+        \midrule
+        gemini-flash   & Google    & Small  & Có  & 0.0025 \\
+        gemini-pro     & Google    & Large  & Có  & 0.0150 \\
+        gpt-3.5-turbo  & OpenAI   & Medium & Mock & 0.0040 \\
+        gpt-4o-mini    & OpenAI   & Medium & Mock & 0.0050 \\
+        gpt-4-turbo    & OpenAI   & Large  & Mock & 0.0160 \\
+        claude-haiku   & Anthropic & Medium & Mock & 0.0035 \\
+        claude-opus    & Anthropic & Large  & Mock & 0.0140 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Danh sách model AI được hỗ trợ}
+\end{table}
+
+\textbf{Lưu ý:} Chỉ model Google (gemini-flash, gemini-pro) có \texttt{apiModelId} thực. Các model OpenAI và Anthropic sử dụng mock response.
+
+Mỗi model mang cả dữ liệu \texttt{modelClass} (class-based) và \texttt{jPerToken} (model-specific), cho phép hai phiên bản tính toán V1 và V2.
+
+\subsubsection{AVAILABLE\_REGIONS — 12 Khu Vực}
+
+Hệ thống hỗ trợ 12 khu vực với Carbon Intensity (CI) khác nhau:
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{llr}
+        \toprule
+        \textbf{ID} & \textbf{Khu vực} & \textbf{CI (gCO\textsubscript{2}/kWh)} \\
+        \midrule
+        vietnam & Việt Nam        & 681 \\
+        china   & Trung Quốc      & 530 \\
+        india   & Ấn Độ           & 632 \\
+        us      & Hoa Kỳ          & 376 \\
+        eu      & EU              & 220 \\
+        uk      & Anh             & 170 \\
+        japan   & Nhật Bản        & 430 \\
+        korea   & Hàn Quốc        & 400 \\
+        australia & Úc            & 480 \\
+        nordics & Bắc Âu          & 20  \\
+        france  & Pháp            & 50  \\
+        global  & Trung bình TG   & 445 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Carbon Intensity theo khu vực (nguồn: IEA, Ember 2024)}
+\end{table}
+
+\subsubsection{Hằng số quy đổi carbon}
+
+File cũng định nghĩa các hằng số để quy đổi CO\textsubscript{2} sang đơn vị tương đương:
+\begin{itemize}
+    \item Cây xanh hấp thụ: 25 kg CO\textsubscript{2}/năm/cây (EcoTree)
+    \item Xe hơi: 120.4 g CO\textsubscript{2}/km (ACEA/EU 2024)
+    \item Chuyến bay HN$\rightarrow$SGN: 180 kg CO\textsubscript{2} (ICAO)
+    \item Netflix streaming: 36 g CO\textsubscript{2}/giờ (IEA/Carbon Trust)
+    \item Chi phí offset: \$12/tấn (voluntary), \$55/tấn (EU ETS)
+\end{itemize}
+
+% ---- 2.2 ----
+\subsection{gemini-api.ts — Tích Hợp Google Gemini API}
+
+File này xử lý việc gọi Google Gemini REST API để lấy response AI thực.
+
+\subsubsection{Cách hoạt động}
+
+\begin{enumerate}
+    \item Kiểm tra API key từ biến môi trường \texttt{NEXT\_PUBLIC\_GEMINI\_API\_KEY}
+    \item Gửi request POST tới endpoint: \\
+    \texttt{generativelanguage.googleapis.com/v1beta/models/\{model\}:generateContent}
+    \item Parse response và trích xuất:
+    \begin{itemize}
+        \item Nội dung text response
+        \item \textbf{Token count thực} từ \texttt{usageMetadata}: prompt tokens + candidate tokens
+        \item Cộng thêm \texttt{thoughtsTokenCount} cho model Gemini 2.5 (có thinking)
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{System Instruction}
+
+API được cấu hình với system prompt hướng AI trả lời theo chủ đề carbon/sustainability. \texttt{maxOutputTokens} = 512 để kiểm soát chi phí.
+
+\subsubsection{Xử lý lỗi}
+
+Nếu API key không tồn tại hoặc request thất bại, hệ thống tự động fallback sang mock LLM.
+
+% ---- 2.3 ----
+\subsection{mock-llm.ts — Mock LLM Fallback}
+
+File này cung cấp response giả lập cho các model không có API thực (OpenAI, Anthropic).
+
+\subsubsection{Cách hoạt động}
+\begin{itemize}
+    \item \textbf{8 template response} đa dạng về chủ đề AI sustainability
+    \item \textbf{Chọn response xác định (deterministic):} Dùng hash tổng ký tự của prompt để chọn template, đảm bảo cùng prompt luôn ra cùng response
+    \item \textbf{Độ dài response thay đổi theo model class:}
+    \begin{itemize}
+        \item Small: 3 câu đầu tiên
+        \item Medium: 5 câu đầu tiên
+        \item Large: toàn bộ response
+    \end{itemize}
+    \item \textbf{Ước lượng token:} \texttt{ceil(text.length / 4)} — heuristic chuẩn GPT tokenizer
+\end{itemize}
+
+% ============================================================
+\section{Tầng 2 — Carbon Calculation (Tính Toán Carbon)}
+% ============================================================
+
+% ---- 3.1 ----
+\subsection{carbon-calc.ts — Engine Tính Toán Carbon}
+
+Đây là \textbf{core engine} chính, chứa tất cả công thức tính năng lượng và phát thải CO\textsubscript{2}.
+
+\subsubsection{Phiên bản V1 — Class-based (dùng cho so sánh baseline)}
+
+Công thức V1 sử dụng hệ số năng lượng theo class (small/medium/large):
+
+\begin{align}
+    \text{Energy (kWh)} &= \frac{\text{tokens}}{1000} \times E_{\text{coeff}} \\
+    \text{CO}_2 \text{ (g)} &= \text{Energy (kWh)} \times \text{CI (gCO}_2\text{/kWh)}
+\end{align}
+
+Trong đó $E_{\text{coeff}}$ lấy từ \texttt{ENERGY\_COEFFICIENTS}: small = 0.0007, medium = 0.0012, large = 0.0045.
+
+\subsubsection{Phiên bản V2 — Model-specific (dùng chính trong app)}
+
+Công thức V2 sử dụng \texttt{jPerToken} riêng cho từng model, chính xác hơn:
+
+\begin{align}
+    \text{Energy (kWh)} &= \frac{(\text{inputTokens} + \text{outputTokens}) \times \text{jPerToken}}{3{,}600{,}000} \\
+    \text{CO}_2 \text{ (g)} &= \text{Energy (kWh)} \times \text{CI}
+\end{align}
+
+Hệ số 3,600,000 chuyển đổi từ Joule sang kWh (1 kWh = 3.6 MJ).
+
+Nếu model không có \texttt{jPerToken} (= 0), hệ thống tự động fallback sang V1 class-based.
+
+\subsubsection{Carbon Level — Phân loại mức độ}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Level} & \textbf{Điều kiện} & \textbf{Màu} \\
+        \midrule
+        Low    & $< 0.5$ g CO\textsubscript{2} & Xanh lá (\texttt{\#0FA697}) \\
+        Medium & $0.5 - 2$ g CO\textsubscript{2} & Vàng (\texttt{\#D9CD2B}) \\
+        High   & $\geq 2$ g CO\textsubscript{2}  & Đỏ (\texttt{\#D91A1A}) \\
+        \bottomrule
+    \end{tabular}
+    \caption{Phân loại mức độ phát thải}
+\end{table}
+
+\subsubsection{Các hàm chính}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lp{8cm}}
+        \toprule
+        \textbf{Hàm} & \textbf{Mục đích} \\
+        \midrule
+        \texttt{calculateEnergy()} & V1: Tính năng lượng từ tokens + class \\
+        \texttt{calculateCO2()} & V1: Tính CO\textsubscript{2} từ energy + CI \\
+        \texttt{computeMetrics()} & V1 pipeline đầy đủ (cho baseline comparison) \\
+        \texttt{computeMetricsV2()} & V2 pipeline chính (dùng trong store) \\
+        \texttt{computeUserMetrics()} & Chỉ đếm token, không tính carbon (user msg) \\
+        \texttt{getCarbonLevel()} & Phân loại low/medium/high \\
+        \texttt{toSmartphoneCharges()} & Quy đổi Wh sang số lần sạc điện thoại \\
+        \bottomrule
+    \end{tabular}
+    \caption{Các hàm trong carbon-calc.ts}
+\end{table}
+
+% ---- 3.2 ----
+\subsection{carbon-intensity-api.ts — Carbon Intensity Thời Gian Thực}
+
+File này fetch dữ liệu carbon intensity live từ API bên ngoài với \textbf{3 tầng fallback}:
+
+\subsubsection{Thứ tự ưu tiên}
+
+\begin{enumerate}
+    \item \textbf{Electricity Maps API} (global, cần API token) \\
+    Endpoint: \texttt{api.electricitymaps.com/v3} \\
+    Hỗ trợ tất cả 12 khu vực, dữ liệu real-time
+
+    \item \textbf{UK National Grid API} (chỉ UK, miễn phí, không cần key) \\
+    Endpoint: \texttt{api.carbonintensity.org.uk} \\
+    Cung cấp dữ liệu 24h forecast chi tiết
+
+    \item \textbf{Static fallback} \\
+    Sử dụng giá trị CI cố định từ \texttt{CARBON\_INTENSITY\_BY\_REGION}
+\end{enumerate}
+
+\subsubsection{Caching}
+
+Dữ liệu được cache 5 phút để tránh gọi API quá nhiều. Mỗi khu vực có cache riêng.
+
+\subsubsection{Carbon Intensity Index}
+
+CI được phân loại thành 5 mức:
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lr}
+        \toprule
+        \textbf{Index} & \textbf{CI (gCO\textsubscript{2}/kWh)} \\
+        \midrule
+        Very Low  & $\leq 50$ \\
+        Low       & $\leq 150$ \\
+        Moderate  & $\leq 300$ \\
+        High      & $\leq 500$ \\
+        Very High & $> 500$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{Phân loại Carbon Intensity Index}
+\end{table}
+
+\subsubsection{Green Hours Data}
+
+API cũng cung cấp dữ liệu \textbf{Green Hours} — 24 slot thời gian trong ngày với CI tương ứng. Hệ thống tự động xác định:
+\begin{itemize}
+    \item \textbf{Best slot:} Thời điểm CI thấp nhất (tốt nhất để chạy AI)
+    \item \textbf{Worst slot:} Thời điểm CI cao nhất (nên tránh)
+    \item \textbf{Saving percent:} Tiết kiệm bao nhiêu \% carbon nếu chạy vào best slot
+\end{itemize}
+
+% ============================================================
+\section{Tầng 3 — Smart Optimization (Tối Ưu Thông Minh)}
+% ============================================================
+
+% ---- 4.1 ----
+\subsection{model-router.ts — Auto Model Routing (Phase 2.1)}
+
+Module này phân tích độ phức tạp của prompt và gợi ý model tối ưu nhất.
+
+\subsubsection{Phân loại độ phức tạp}
+
+Hệ thống phân tích prompt theo 3 mức:
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lp{8cm}}
+        \toprule
+        \textbf{Mức} & \textbf{Điều kiện} \\
+        \midrule
+        Simple & $<30$ tokens, hoặc bắt đầu bằng ``what is'', ``hello'', ``hi'', ``thanks'' \\
+        Standard & Chứa ``explain'', ``how to'', ``summarize'', 80--200 tokens \\
+        Complex & Chứa code block, $>300$ tokens, ``analyze'', ``debug'', ``implement'', ``refactor'' \\
+        \bottomrule
+    \end{tabular}
+    \caption{Phân loại độ phức tạp prompt}
+\end{table}
+
+\subsubsection{Model gợi ý theo mức}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Mức} & \textbf{Model ưu tiên (theo thứ tự)} \\
+        \midrule
+        Simple   & gemini-flash, gpt-3.5-turbo, claude-haiku \\
+        Standard & gemini-flash, gpt-4o-mini, claude-haiku \\
+        Complex  & gemini-pro, gpt-4-turbo, claude-opus, gemini-flash \\
+        \bottomrule
+    \end{tabular}
+    \caption{PREFERRED\_MODELS cho từng mức phức tạp}
+\end{table}
+
+\subsubsection{Logic gợi ý 2 chiều}
+
+\begin{itemize}
+    \item \textbf{Downgrade (tiết kiệm carbon):} Nếu user dùng model lớn mà prompt đơn giản $\rightarrow$ gợi ý model nhỏ hơn, kèm \% tiết kiệm carbon. Chỉ gợi ý khi tiết kiệm $>10\%$.
+    \item \textbf{Upgrade (nâng chất lượng):} Nếu user dùng model nhỏ mà prompt phức tạp $\rightarrow$ gợi ý model mạnh hơn để cho kết quả chất lượng.
+\end{itemize}
+
+\subsubsection{Công thức tính carbon saving}
+
+\begin{equation}
+    \text{Carbon Saving (\%)} = \frac{\text{jPerToken}_{\text{current}} - \text{jPerToken}_{\text{suggested}}}{\text{jPerToken}_{\text{current}}} \times 100
+\end{equation}
+
+% ---- 4.2 ----
+\subsection{carbon-forecast.ts — Dự Báo Carbon (Phase 2.2)}
+
+Module này sử dụng \textbf{hồi quy tuyến tính (linear regression)} để dự báo tổng phát thải CO\textsubscript{2} cuối ngày.
+
+\subsubsection{Công thức dự báo}
+
+\begin{align}
+    \text{Rate} &= \frac{\text{totalCO}_2}{\text{hoursElapsed}} \quad \text{(g/giờ)} \\
+    \text{Prediction} &= \text{current} + \text{rate} \times \text{hoursRemaining} \times 0.7
+\end{align}
+
+\textbf{Hệ số 0.7 (decay factor):} Giả định tốc độ sử dụng giảm dần theo thời gian (người dùng không chat liên tục 24/7).
+
+\subsubsection{Trạng thái budget}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Trạng thái} & \textbf{Điều kiện} \\
+        \midrule
+        On-track  & Prediction $\leq 80\%$ budget \\
+        Exceeding & Prediction $\leq 120\%$ budget \\
+        Critical  & Prediction $> 120\%$ budget \\
+        \bottomrule
+    \end{tabular}
+    \caption{Phân loại trạng thái budget}
+\end{table}
+
+\subsubsection{Trend Data}
+
+Hàm tạo dữ liệu trend gồm:
+\begin{itemize}
+    \item Các điểm quá khứ từ \texttt{resilienceHistory}
+    \item Các điểm dự báo tương lai (mỗi giờ, tối đa 12h)
+\end{itemize}
+
+% ---- 4.3 ----
+\subsection{carbon-scheduler.ts — Lập Lịch Carbon-Aware (Phase 2.3)}
+
+Module này định nghĩa kiểu \texttt{ScheduledTask} và logic lập lịch cho phép user \textbf{hẹn giờ gửi prompt vào thời điểm carbon thấp nhất}.
+
+Logic chính được thực hiện trong \texttt{store.ts}:
+
+\begin{enumerate}
+    \item User nhấn nút ``Schedule'' thay vì ``Send''
+    \item Hệ thống tìm \textbf{best green hour slot} từ dữ liệu carbon intensity
+    \item Tạo \texttt{ScheduledTask} với trạng thái ``queued''
+    \item User có thể ``Run Now'' (chạy ngay) hoặc ``Cancel'' (hủy)
+    \item Khi chạy, hệ thống tạo user message + gọi AI response, đánh dấu ``completed'' \textbf{sau khi} AI trả lời xong
+\end{enumerate}
+
+% ============================================================
+\section{Tầng 4 — Assessment \& Reporting}
+% ============================================================
+
+% ---- 5.1 ----
+\subsection{resilience-engine.ts — Đánh Giá Resilience}
+
+Module này tính toán \textbf{3 chỉ số resilience doanh nghiệp}:
+
+\subsubsection{1. Carbon Exposure (0--100)}
+
+Đo lường mức phụ thuộc vào model AI tốn carbon:
+
+\begin{equation}
+    \text{Exposure} = \text{clamp}\left(\frac{\text{avgCO}_2\text{Per1KTokens} - 0.3}{2.5 - 0.3} \times 100, \; 0, \; 100\right)
+\end{equation}
+
+Trong đó 0.3 g/1K tokens là mức tối thiểu (model nhỏ), 2.5 g/1K tokens là mức tối đa (model lớn).
+
+\subsubsection{2. Cost Shock Index (0--100)}
+
+Đánh giá rủi ro khi thị trường carbon thay đổi:
+
+\begin{itemize}
+    \item \textbf{60 điểm:} Tỷ lệ phụ thuộc model lớn (large model dependency)
+    \item \textbf{20 điểm:} Thiếu đa dạng hóa model (diversity penalty) — nếu chỉ dùng $\leq 2$ model
+    \item \textbf{20 điểm:} Hiệu suất thấp (efficiency penalty) — nếu CO\textsubscript{2}/token cao
+\end{itemize}
+
+\subsubsection{3. Resilience Score (0--100)}
+
+Chỉ số tổng hợp (điểm càng cao = càng tốt):
+
+\begin{equation}
+    \text{Resilience} = 100 - (0.6 \times \text{Exposure} + 0.4 \times \text{CostShock}) + \text{SmallModelBonus}
+\end{equation}
+
+\textbf{SmallModelBonus:} +5 điểm cho mỗi tin nhắn dùng model small, tối đa +15.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Label} & \textbf{Điểm} \\
+        \midrule
+        Healthy  & $< 40$ (Exposure/CostShock) hoặc $\geq 60$ (Resilience) \\
+        Moderate & 40--70 \\
+        Critical & $\geq 70$ (Exposure/CostShock) hoặc $< 40$ (Resilience) \\
+        \bottomrule
+    \end{tabular}
+    \caption{Phân loại trạng thái Resilience}
+\end{table}
+
+% ---- 5.2 ----
+\subsection{ghg-protocol.ts — GHG Protocol Engine (Phase 4.1)}
+
+Module này tính phát thải theo \textbf{GHG Protocol Corporate Standard} và \textbf{ISO 14064-1:2018}.
+
+\subsubsection{Scope 2 — Phát thải gián tiếp từ điện mua}
+
+\begin{equation}
+    \text{Scope 2 (gCO}_2\text{)} = \frac{\text{Energy (Wh)}}{1000} \times \text{CI (gCO}_2\text{/kWh)}
+\end{equation}
+
+Đây là phát thải trực tiếp từ việc mua điện để chạy inference AI.
+
+\subsubsection{Scope 3 — Phát thải chuỗi giá trị}
+
+Scope 3 Category 11 bao gồm:
+
+\begin{enumerate}
+    \item \textbf{Training Amortization:} Chi phí carbon huấn luyện model được phân bổ theo số query:
+    \begin{equation}
+        \text{Training CO}_2 = \sum_{\text{msg}} \frac{\text{totalTokens}}{1000} \times \text{rate}_{\text{model}}
+    \end{equation}
+
+    Trong đó \texttt{rate} lấy từ bảng \texttt{TRAINING\_CO2\_PER\_1K\_TOKENS} (nguồn: Strubell 2019, Patterson 2021, Luccioni 2023).
+
+    \item \textbf{Infrastructure Overhead:} Chi phí hạ tầng data center:
+    \begin{equation}
+        \text{Infrastructure} = \text{Training} \times (\text{PUE} - 1) = \text{Training} \times 0.15
+    \end{equation}
+
+    PUE = 1.15 là mức trung bình cho hyperscale data center (Google 2024).
+\end{enumerate}
+
+\subsubsection{Verification Statement}
+
+Hàm \texttt{generateVerificationStatement()} tạo báo cáo xác minh gồm:
+\begin{itemize}
+    \item Methodology: GHG Protocol + ISO 14064-1
+    \item Data sources: 5 nguồn dữ liệu chính
+    \item Confidence level: medium
+    \item Limitations: 4 hạn chế đã biết
+\end{itemize}
+
+\subsubsection{Report Hash}
+
+Hàm \texttt{generateReportHash()} tạo mã định danh duy nhất cho mỗi báo cáo dưới dạng: \texttt{ACRM-XXXXXXXX-YYYYY} (hex hash + timestamp base36).
+
+% ---- 5.3 ----
+\subsection{pdf-export.ts — Xuất Báo Cáo PDF (Phase 4.3)}
+
+Module này tạo PDF chuyên nghiệp nhiều trang sử dụng \textbf{jsPDF} và \textbf{qrcode}.
+
+\subsubsection{Cấu trúc PDF (10 phần)}
+
+\begin{enumerate}
+    \item \textbf{Header:} Gradient xanh brand, report ID, ISO badges, khu vực
+    \item \textbf{Executive Summary:} Tóm tắt 4 dòng với tổng CO\textsubscript{2}, tokens, budget, resilience
+    \item \textbf{Session Stats Grid:} 4 ô màu hiển thị Total CO\textsubscript{2}, Energy, Tokens, Budget
+    \item \textbf{GHG Scope Table:} Bảng Scope 2 + 3 với tỷ lệ phần trăm
+    \item \textbf{CO\textsubscript{2} Bar Chart:} Biểu đồ cột CO\textsubscript{2} theo từng tin nhắn (xanh/vàng/đỏ)
+    \item \textbf{Model Distribution:} Bảng phân bố model với mini bar
+    \item \textbf{Verification \& Methodology:} Phương pháp luận + nguồn dữ liệu
+    \item \textbf{QR Code:} Mã QR chứa report hash + CO\textsubscript{2} data
+    \item \textbf{Digital Signature:} Report hash + timestamp + tiêu chuẩn
+    \item \textbf{Page Footer:} Report ID + số trang trên mỗi trang
+\end{enumerate}
+
+PDF tự động thêm trang mới khi nội dung vượt quá 250--270 pixel.
+
+% ---- 5.4 ----
+\subsection{session-manager.ts — Quản Lý Phiên Chat}
+
+Module CRUD cho lưu/tải/xóa các phiên chat sử dụng \texttt{localStorage}.
+
+\begin{itemize}
+    \item Tối đa \textbf{20 phiên} được lưu, sắp xếp mới nhất lên đầu
+    \item Mỗi phiên lưu: messages, model, region, sessionStats, budget, resilienceHistory
+    \item Hỗ trợ: Save / Load / Delete / Clear All
+\end{itemize}
+
+% ============================================================
+\section{State Management — store.ts (Zustand)}
+% ============================================================
+
+File \texttt{store.ts} là \textbf{trung tâm điều khiển (central hub)} quản lý toàn bộ state và logic ứng dụng.
+
+\subsection{State Fields (18 trường)}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lp{8cm}}
+        \toprule
+        \textbf{Nhóm} & \textbf{Các trường} \\
+        \midrule
+        Chat & messages, isGenerating, recommendation \\
+        Model & selectedModelId, routingSuggestion, lastPromptForRouting \\
+        Session & sessionStats, sessionStartTime \\
+        Carbon & carbonBudget, budgetWarningShown \\
+        Region & selectedRegion, liveCarbonIntensity, isCILive, ciIndex \\
+        History & resilienceHistory, promptHistory, greenHours \\
+        Schedule & scheduledTasks \\
+        Safety & duplicateWarning \\
+        \bottomrule
+    \end{tabular}
+    \caption{Các nhóm state trong Zustand store}
+\end{table}
+
+\subsection{Luồng gửi tin nhắn (sendMessage)}
+
+Khi user gửi tin nhắn, \texttt{sendMessage()} thực hiện:
+
+\begin{enumerate}
+    \item Tạo user \texttt{ChatMessage} với token count ước lượng
+    \item Chạy \textbf{Duplicate Detection} — so sánh Jaccard similarity trên tập từ (threshold 0.6)
+    \item Chạy \textbf{Model Routing} — phân tích complexity, gợi ý model tối ưu
+    \item Cập nhật state: messages, stats, recommendation
+    \item Gọi \texttt{handleAIResponse()} — thử Gemini API $\rightarrow$ fallback mock
+    \item Tính \texttt{computeMetricsV2()} cho response
+    \item Cập nhật sessionStats (CO\textsubscript{2}, energy, tokens)
+    \item Push resilience snapshot vào history
+\end{enumerate}
+
+\subsection{Persistence}
+
+Store sử dụng Zustand \texttt{persist} middleware lưu vào \texttt{localStorage}:
+messages, selectedModelId, selectedRegion, sessionStats, carbonBudget, resilienceHistory.
+
+% ============================================================
+\section{Components — Giao Diện Người Dùng}
+% ============================================================
+
+\subsection{Nhóm Chat}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lp{9cm}}
+        \toprule
+        \textbf{Component} & \textbf{Chức năng} \\
+        \midrule
+        ChatInterface & Cửa sổ chat chính: input, send/schedule button, message bubbles, typing indicator, auto-scroll \\
+        CarbonTag & Badge inline trên mỗi tin nhắn hiển thị tokens, energy, CO\textsubscript{2}, level \\
+        SmartRecommendation & Toast gợi ý chuyển model (Switch/Keep) với auto-dismiss \\
+        DuplicateWarning & Toast cảnh báo tin nhắn trùng lặp, auto-dismiss sau 6s \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Nhóm Dashboard}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lp{9cm}}
+        \toprule
+        \textbf{Component} & \textbf{Chức năng} \\
+        \midrule
+        ResilienceDashboard & Dashboard chính: stat cards, score gauges (SVG arc), baseline comparison chart, model breakdown pie, forecast card, ESG report export, PDF export \\
+        CarbonBudget & Ring progress (SVG) hiển thị \% budget đã dùng, cho chỉnh budget \\
+        GreenHours & Biểu đồ 24h carbon intensity với best/worst slots \\
+        CarbonOffset & Quy đổi CO\textsubscript{2} sang đơn vị tương đương (cây, xe, bay, Netflix) \\
+        ScheduledTasks & Danh sách task đã lập lịch: Run Now / Cancel \\
+        SessionHistory & Lưu/tải/xóa phiên chat từ localStorage \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Nhóm Navigation \& Theme}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lp{9cm}}
+        \toprule
+        \textbf{Component} & \textbf{Chức năng} \\
+        \midrule
+        ModelSelector & Dropdown chọn model AI + badge class (Eco/Balanced/Power) \\
+        RegionSelector & Dropdown chọn khu vực + indicator Live/Static CI \\
+        Navbar & Thanh navigation với link Home/Chat/Compare/Team + theme toggle \\
+        ThemeToggle & Nút chuyển dark/light mode \\
+        ThemeScript & Inline script ngăn flash trắng khi load trang dark mode \\
+        Footer & Footer với credits và links \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% ============================================================
+\section{App Pages — Các Trang}
+% ============================================================
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{llp{8cm}}
+        \toprule
+        \textbf{Route} & \textbf{Trang} & \textbf{Mô tả} \\
+        \midrule
+        \texttt{/} & Landing Page & Hero section, features grid (6 tính năng), kiến trúc 4 tầng, CTA \\
+        \texttt{/chat} & Chat Page & Layout split: chat bên trái + sidebar dashboard bên phải; responsive mobile \\
+        \texttt{/compare} & Compare Page & So sánh nhiều model song song: cùng prompt, so carbon/tokens \\
+        \texttt{/team} & Team Page & Thông tin đội ngũ phát triển \\
+        \bottomrule
+    \end{tabular}
+    \caption{Các trang ứng dụng}
+\end{table}
+
+% ============================================================
+\section{Luồng Dữ Liệu Tổng Thể}
+% ============================================================
+
+Khi user gửi tin nhắn, dữ liệu đi qua toàn bộ 4 tầng:
+
+\begin{enumerate}
+    \item \textbf{User} gửi prompt $\rightarrow$ \texttt{store.sendMessage()}
+    \item \texttt{model-router} phân tích complexity $\rightarrow$ gợi ý model
+    \item \texttt{store} tạo user ChatMessage, kiểm tra duplicate
+    \item \texttt{gemini-api} hoặc \texttt{mock-llm} tạo AI response
+    \item \texttt{carbon-calc.computeMetricsV2()} tính energy \& CO\textsubscript{2}
+    \item \texttt{store} cập nhật sessionStats
+    \item \texttt{resilience-engine} tính Exposure, Cost Shock, Resilience Score
+    \item \texttt{store} push snapshot vào resilienceHistory
+    \item UI tự động re-render: CarbonTag, Dashboard gauges, charts, budget ring
+\end{enumerate}
+
+% ============================================================
+\section{Dependencies}
+% ============================================================
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Package} & \textbf{Mục đích} & \textbf{Sử dụng trong} \\
+        \midrule
+        next 16.1.6    & Framework React SSR/SSG & Toàn bộ app \\
+        react 19       & UI library              & Components \\
+        zustand        & State management         & store.ts \\
+        recharts       & Charts (Bar, Pie, Radar) & ResilienceDashboard \\
+        jspdf          & Tạo PDF                  & pdf-export.ts \\
+        qrcode         & Tạo QR code              & pdf-export.ts \\
+        tailwindcss 4  & CSS utilities            & Toàn bộ components \\
+        typescript     & Type safety              & Toàn bộ codebase \\
+        \bottomrule
+    \end{tabular}
+    \caption{Dependencies chính}
+\end{table}
+
+% ============================================================
+\section{Biến Môi Trường}
+% ============================================================
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lp{8cm}}
+        \toprule
+        \textbf{Biến} & \textbf{Mô tả} \\
+        \midrule
+        \texttt{NEXT\_PUBLIC\_GEMINI\_API\_KEY} & API key Google Gemini (bắt buộc cho API thực) \\
+        \texttt{NEXT\_PUBLIC\_EMAPS\_TOKEN} & Token Electricity Maps (tùy chọn, cho live CI) \\
+        \bottomrule
+    \end{tabular}
+    \caption{Biến môi trường cần cấu hình}
+\end{table}
+
+Cả hai biến đều có prefix \texttt{NEXT\_PUBLIC\_} nên được expose ra client-side. File cấu hình: \texttt{.env.local}.
+
+\end{document}

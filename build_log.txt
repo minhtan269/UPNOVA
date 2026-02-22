@@ -1,0 +1,88 @@
+﻿Γû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 4.6s
+  Running TypeScript ...
+node.exe : Failed to compile.
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" "C:\Users
+\SmilingLaptop\AppData\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~
+    + CategoryInfo          : 
+NotSpe    cified: (Failed to 
+compile.:Stri    ng) [], 
+RemoteException
+    + FullyQualifiedErrorId : 
+Native    CommandError
+ 
+
+./app/analytics/page.tsx:242:45
+Type error: Type '(value: 
+number) => string' is not 
+assignable to type 
+'Formatter<number, NameType> & 
+((value: number, name: 
+NameType, item: Payload<number, 
+NameType>, index: number, 
+payload: Payload<number, 
+NameType>[]) => ReactNode | 
+[...])'.
+  Type '(value: number) => 
+string' is not assignable to 
+type 'Formatter<number, 
+NameType>'.
+    Types of parameters 'value' 
+and 'value' are incompatible.
+      Type 'number | undefined' 
+is not assignable to type 
+'number'.
+        Type 'undefined' is not 
+assignable to type 'number'.
+
+[0m [90m 240 |[39m           
+                                
+      color[33m:[39m [32m"var
+(--foreground)"[39m[33m,[39m
+ [90m 241 |[39m               
+                              }}
+[31m[1m>[22m[39m[90m 242 
+|[39m                          
+                   formatter[33
+m=[39m{(value[33m:[39m 
+number) [33m=>[39m 
+formatNumber(value)}
+ [90m     |[39m               
+                              
+[31m[1m^[22m[39m
+ [90m 243 |[39m               
+                          
+[33m/[39m[33m>[39m
+ [90m 244 |[39m               
+                          
+[33m<[39m[33mLine[39m type[
+33m=[39m[32m"monotone"[39m da
+taKey[33m=[39m[32m"co2"[39m 
+stroke[33m=[39m[32m"#0FA697"
+[39m strokeWidth[33m=[39m{[35
+m2[39m} dot[33m=[39m{{ 
+r[33m:[39m [35m3[39m }} 
+name[33m=[39m[32m"COΓéé 
+(g)"[39m [33m/[39m[33m>[39m
+ [90m 245 |[39m               
+                          
+[33m<[39m[33mLine[39m type[
+33m=[39m[32m"monotone"[39m da
+taKey[33m=[39m[32m"energy"[3
+9m stroke[33m=[39m[32m"#AED91
+1"[39m strokeWidth[33m=[39m{
+[35m2[39m} dot[33m=[39m{{ 
+r[33m:[39m [35m3[39m }} 
+name[33m=[39m[32m"Energy 
+(Wh)"[39m 
+[33m/[39m[33m>[39m[0m
+Next.js build worker exited 
+with code: 1 and signal: null
