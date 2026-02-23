@@ -10,13 +10,17 @@ export function ThemeScript() {
 (function() {
   try {
     const saved = localStorage.getItem("acrm-theme");
-    const preferDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    
-    if (saved === "dark" || (!saved && preferDark)) {
-      document.documentElement.setAttribute("data-theme", "dark");
+    const theme = saved === "light" || saved === "dark" ? saved : "dark";
+
+    // Product default: dark theme for first visit.
+    if (!saved) {
+      localStorage.setItem("acrm-theme", "dark");
+    }
+
+    document.documentElement.setAttribute("data-theme", theme);
+    if (theme === "dark") {
       document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.setAttribute("data-theme", "light");
       document.documentElement.classList.remove("dark");
     }
   } catch (e) {}

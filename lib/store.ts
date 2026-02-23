@@ -788,16 +788,11 @@ export const useACRMStore = create<ACRMState>()(persist((set, get) => ({
                 supplemental
             );
 
-            const latestUserPrompt = [...state.messages]
-                .reverse()
-                .find((m) => m.role === "user")?.content;
-            const languageMode = getAdvisorLanguageModeFromText(latestUserPrompt);
-
             const draft = await generateAdvisorDraftContent(
                 snapshot,
                 supplemental,
                 state.selectedModelId,
-                languageMode
+                "en"
             );
 
             set({
@@ -933,8 +928,12 @@ export const useACRMStore = create<ACRMState>()(persist((set, get) => ({
     },
 }), {
     name: "acrm-session",
-    version: 4,
+    version: 5,
     migrate: (persistedState: unknown, fromVersion: number) => {
+        if (fromVersion < 5) {
+            return {};
+        }
+
         const state = (persistedState && typeof persistedState === "object"
             ? persistedState
             : {}) as Partial<ACRMState> & {
@@ -969,10 +968,7 @@ export const useACRMStore = create<ACRMState>()(persist((set, get) => ({
             ciFactorType: state.ciFactorType ?? "unknown",
             ciZoneLabel: state.ciZoneLabel ?? null,
             ciIsRepresentativeZone: state.ciIsRepresentativeZone ?? false,
-            advisorSupplementalInput:
-                fromVersion >= 4
-                    ? normalizedAdvisorInput
-                    : DEFAULT_ADVISOR_SUPPLEMENTAL_INPUT,
+            advisorSupplementalInput: normalizedAdvisorInput,
             advisorDraft: normalizedAdvisorDraft,
             advisorQAHistory: normalizedAdvisorHistory,
         };

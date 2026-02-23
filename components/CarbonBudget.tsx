@@ -26,19 +26,19 @@ export default function CarbonBudget() {
 
     if (usedPct >= 100) {
         ringColor = "#D91A1A";
-        statusLabel = "Vượt ngân sách!";
+        statusLabel = "Budget exceeded!";
         statusColor = "text-[#D91A1A]";
     } else if (usedPct >= 85) {
         ringColor = "#D91A1A";
-        statusLabel = "Sắp hết!";
+        statusLabel = "Near limit!";
         statusColor = "text-[#D91A1A]";
     } else if (usedPct >= 60) {
         ringColor = "#D9CD2B";
-        statusLabel = "Cẩn thận";
+        statusLabel = "Warning";
         statusColor = "text-[#b8a800]";
     } else {
         ringColor = "#0FA697";
-        statusLabel = "Tốt";
+        statusLabel = "Good";
         statusColor = "text-[#0FA697]";
     }
 
@@ -57,7 +57,7 @@ export default function CarbonBudget() {
                     onClick={() => setIsEditing(!isEditing)}
                     className="text-[10px] text-gray-400 hover:text-[#0FA697] transition-colors"
                 >
-                    {isEditing ? "✓ Xong" : "⚙️ Đặt budget"}
+                    {isEditing ? "✓ Done" : "⚙️ Set budget"}
                 </button>
             </div>
 
@@ -120,21 +120,21 @@ export default function CarbonBudget() {
                         <span className="text-lg font-black" style={{ color: ringColor }}>
                             {usedPct.toFixed(0)}%
                         </span>
-                        <span className="text-[8px] text-gray-400 dark:text-gray-500">đã dùng</span>
+                        <span className="text-[8px] text-gray-400 dark:text-gray-500">used</span>
                     </div>
                 </div>
 
                 {/* Stats beside ring */}
                 <div className="flex-1 space-y-1.5">
                     <div>
-                        <div className="text-[10px] text-gray-400">Đã dùng</div>
+                        <div className="text-[10px] text-gray-400">Used</div>
                         <div className="text-sm font-bold text-gray-700 dark:text-gray-200">
                             {totalCO2 < 0.01 ? totalCO2.toExponential(1) : totalCO2.toFixed(4)}g
                             <span className="text-gray-400 dark:text-gray-500 font-normal"> / {carbonBudget}g</span>
                         </div>
                     </div>
                     <div>
-                        <div className="text-[10px] text-gray-400">Còn lại</div>
+                        <div className="text-[10px] text-gray-400">Remaining</div>
                         <div className="text-sm font-bold" style={{ color: ringColor }}>
                             {remaining < 0.01 ? remaining.toExponential(1) : remaining.toFixed(4)}g
                         </div>

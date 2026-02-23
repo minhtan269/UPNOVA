@@ -48,6 +48,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
         team: "tech",
         bio: "In charge of researching and implementing carbon calculation models for AI, analyzing energy data, and building ESG assessment systems.",
         skills: ["Python", "Data Analysis", "Machine Learning", "ESG Reporting", "Research"],
+        avatar: "/member/leminhtan.png",
         initials: "LMT",
         gradient: "from-[#AED911] to-[#D9CD2B]",
         contributions: [
@@ -68,6 +69,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
         team: "business",
         bio: "Financial Mathematics student at UEH with strengths in market research, econometric analysis, and startup-oriented business planning.",
         skills: ["Market Research", "Business Planning", "Econometrics"],
+        avatar: "/member/phamhuyhoang.png",
         initials: "PHH",
         gradient: "from-blue-500 to-purple-500",
         contributions: [
