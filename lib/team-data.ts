@@ -90,13 +90,25 @@ export const TEAM_MEMBERS: TeamMember[] = [
     {
         id: "trinh",
         name: "Nguyen Ngoc Trinh",
-        role: "Marketing Manager",
+        role: "Communications & Creative Design",
         team: "business",
-        bio: "Member information will be updated soon. ",
-        skills: ["Marketing", "Branding", "Content"],
+        bio: "Financial Mathematics student at the University of Economics Ho Chi Minh City (UEH) with hands-on experience in communications, social content, and customer-facing roles. Strong in analytical thinking, interpersonal collaboration, and creative execution across student activities and business contexts.",
+        skills: [
+            "Adobe Photoshop",
+            "UI/UX Design",
+            "Customer Service & Communication",
+        ],
         avatar: "/member/nguyenngoctrinh.jpg",
-        initials: "BM2",
+        initials: "NNT",
         gradient: "from-purple-500 to-pink-500",
+        contributions: [
+            "Executive Committee member, Faculty Student Union (2024-2026)",
+            "Deputy Head of Communications and External Relations, Department of Mathematics and Statistics (2025-2026)",
+            "Freelance graphic designer for posters and social media visuals (2024-2026)",
+        ],
+        links: {
+            email: "ngocnguyentrinh061@gmail.com",
+        },
     },
     {
         id: "linh",
