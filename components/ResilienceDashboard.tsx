@@ -486,7 +486,7 @@ export default function ResilienceDashboard() {
         }));
 
     return (
-        <div className="flex h-full flex-col overflow-y-auto custom-scrollbar">
+        <div className="flex h-full min-h-0 flex-col">
             {/* Header */}
             <div className="border-b border-gray-200/60 px-5 py-4">
                 <div className="flex items-center gap-2">

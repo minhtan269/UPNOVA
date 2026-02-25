@@ -118,6 +118,13 @@ body {
   font-size: 1em;
 }
 
+/* Keep malformed KaTeX output from turning text red/noisy. */
+.katex-error {
+  color: inherit !important;
+  border-bottom: 1px dashed currentColor;
+  opacity: 0.85;
+}
+
 /* ---- Custom Scrollbar ---- */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;

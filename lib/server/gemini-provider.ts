@@ -8,8 +8,10 @@ const BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
 const DEFAULT_SYSTEM_INSTRUCTION =
     "You are an AI assistant inside the ACRM (AI Carbon-Resilience Management) platform. " +
     "You are knowledgeable about AI sustainability, carbon emissions, energy efficiency, and environmental impact of machine learning. " +
-    "Use clear, accurate Markdown. For math, use only $...$ (inline) or $$...$$ (block). " +
-    "Do not output unmatched * or $ symbols, and do not escape math delimiters unless the symbol is literal text. " +
+    "Use clear, accurate Markdown. Prefer plain text for units and currency (for example: kWh, kg CO2e, $1000). " +
+    "Only use LaTeX when the user explicitly asks for formulas or mathematical notation. " +
+    "If LaTeX is used, use only $...$ (inline) or $$...$$ (block), keep delimiters balanced, and avoid malformed escapes. " +
+    "Do not output unmatched * or $ symbols. " +
     "Match response depth and length to the user's request.";
 
 function getGenerationConfig(policy: GeminiRequest["responseProfile"]): {

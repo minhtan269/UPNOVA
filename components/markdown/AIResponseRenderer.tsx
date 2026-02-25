@@ -32,11 +32,16 @@ export default function AIResponseRenderer({
   variant = "chat",
 }: AIResponseRendererProps) {
   const normalized = useMemo(() => normalizeAIOutput(content), [content]);
+  const remarkPlugins = normalized.shouldFallbackToPlain || !normalized.hasMath
+    ? [remarkGfm]
+    : [remarkGfm, remarkMath];
+  const rehypePlugins =
+    normalized.shouldFallbackToPlain || !normalized.hasMath ? [] : [rehypeKatex];
 
   return (
     <div className={`${BASE_CLASSES} ${VARIANT_CLASSES[variant]}`}>
-      <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
-        {normalized}
+      <ReactMarkdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins}>
+        {normalized.text}
       </ReactMarkdown>
     </div>
   );

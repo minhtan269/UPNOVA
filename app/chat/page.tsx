@@ -16,7 +16,7 @@ export default function ChatPage() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     return (
-        <div className="flex h-screen overflow-hidden bg-[var(--background)]">
+        <div className="flex h-[100dvh] overflow-hidden bg-[var(--background)]">
             {/* ======= Main Chat Area ======= */}
             <div className="flex flex-1 flex-col min-w-0 min-h-0">
                 {/* Top Bar */}
@@ -85,26 +85,24 @@ export default function ChatPage() {
             {/* ======= Sidebar — Resilience Dashboard ======= */}
             <aside
                 className={`flex-shrink-0 border-l border-gray-200/60 dark:border-[#2a2d3a] bg-[#F2C094]/20 dark:bg-[#13151d]/60 backdrop-blur-sm transition-all duration-300 ease-in-out
-                fixed inset-y-0 right-0 z-50 h-full shadow-2xl md:relative md:z-0 md:shadow-none
+                fixed inset-y-0 right-0 z-50 h-full overflow-y-auto overscroll-contain custom-scrollbar shadow-2xl md:relative md:z-0 md:shadow-none
                 ${sidebarOpen ? "translate-x-0 w-[85vw] md:w-[380px] md:translate-x-0" : "translate-x-full w-[85vw] md:w-0 md:translate-x-0 md:overflow-hidden"}`}
             >
-                <div className="h-full w-full overflow-y-auto custom-scrollbar">
-                    <div className="w-full md:w-[380px]">
-                        {/* Mobile Close Button */}
-                        <div className="flex justify-end p-2 md:hidden">
-                            <button
-                                onClick={() => setSidebarOpen(false)}
-                                className="rounded-full p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
-                            >
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                        <ResilienceDashboard />
-                        <GreenHours />
-                        <ScheduledTasks />
+                <div className="w-full md:w-[380px]">
+                    {/* Mobile Close Button */}
+                    <div className="flex justify-end p-2 md:hidden">
+                        <button
+                            onClick={() => setSidebarOpen(false)}
+                            className="rounded-full p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
+                        >
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
                     </div>
+                    <ResilienceDashboard />
+                    <GreenHours />
+                    <ScheduledTasks />
                 </div>
             </aside>
 
