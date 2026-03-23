@@ -1,59 +1,59 @@
 "use client";
 
 import { CARBON_INTENSITY_BY_REGION } from "@/lib/carbon-constants";
-
-const FEATURES = [
-    {
-        icon: "RT",
-        title: "Real-time Carbon Measurement",
-        description: `Calculates CO2 and energy consumption for every AI interaction, based on formula: CO2(g) = (tokens/1000) x E x CI.`,
-        color: "from-[#0FA697] to-[#AED911]",
-    },
-    {
-        icon: "RG",
-        title: "Regional Carbon Intensity",
-        description: `Supports 12 regions with distinct CI metrics - from Vietnam (${CARBON_INTENSITY_BY_REGION.vietnam} gCO2/kWh) to Nordics (${CARBON_INTENSITY_BY_REGION.nordics} gCO2/kWh).`,
-        color: "from-[#AED911] to-[#D9CD2B]",
-    },
-    {
-        icon: "RS",
-        title: "Resilience Assessment",
-        description: "3 evaluation metrics: AI Carbon Exposure Index, AI Cost Shock Index, and AI Resilience Score.",
-        color: "from-[#D9CD2B] to-[#F2C094]",
-    },
-    {
-        icon: "DD",
-        title: "Duplicate Detection",
-        description:
-            "Automatically identifies similar prompts asked previously, suggesting reuse to reduce carbon.",
-        color: "from-[#0FA697] to-[#0FA697]/60",
-    },
-    {
-        icon: "SR",
-        title: "Smart Recommendation",
-        description:
-            "Alerts when large models are used for simple tasks, suggesting smaller models and estimated CO2 savings.",
-        color: "from-[#D91A1A]/80 to-[#D9CD2B]",
-    },
-    {
-        icon: "AI",
-        title: "ESG/MRV Advisor",
-        description:
-            "Generates advisory draft sections and Q&A guidance for GHG/MRV reporting with explicit assumptions and data gaps.",
-        color: "from-[#F2C094] to-[#0FA697]",
-    },
-];
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 export default function FeaturesSection() {
+    const { t } = useTranslation();
+
+    const FEATURES = [
+        {
+            icon: "RT",
+            title: t("features.realtimeTitle"),
+            description: t("features.realtimeDesc"),
+            color: "from-[#0FA697] to-[#AED911]",
+        },
+        {
+            icon: "RG",
+            title: t("features.regionalTitle"),
+            description: `${t("features.regionalDesc").replace("{vietnam}", String(CARBON_INTENSITY_BY_REGION.vietnam)).replace("{nordics}", String(CARBON_INTENSITY_BY_REGION.nordics))}`,
+            color: "from-[#AED911] to-[#D9CD2B]",
+        },
+        {
+            icon: "RS",
+            title: t("features.resilienceTitle"),
+            description: t("features.resilienceDesc"),
+            color: "from-[#D9CD2B] to-[#F2C094]",
+        },
+        {
+            icon: "DD",
+            title: t("features.duplicateTitle"),
+            description: t("features.duplicateDesc"),
+            color: "from-[#0FA697] to-[#0FA697]/60",
+        },
+        {
+            icon: "SR",
+            title: t("features.smartTitle"),
+            description: t("features.smartDesc"),
+            color: "from-[#D91A1A]/80 to-[#D9CD2B]",
+        },
+        {
+            icon: "AI",
+            title: t("features.advisorTitle"),
+            description: t("features.advisorDesc"),
+            color: "from-[#F2C094] to-[#0FA697]",
+        },
+    ];
+
     return (
         <section className="py-24">
             <div className="mx-auto max-w-7xl px-6">
                 <div className="text-center mb-16">
                     <h2 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 mb-3">
-                        Key Features
+                        {t("features.sectionTitle")}
                     </h2>
                     <p className="text-base text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-                        Core tools to track AI carbon footprint and build ESG/MRV advisory drafts.
+                        {t("features.sectionSubtitle")}
                     </p>
                 </div>
 

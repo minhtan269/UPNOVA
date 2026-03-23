@@ -5,6 +5,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIResponseRenderer from "@/components/markdown/AIResponseRenderer";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 import { useACRMStore } from "@/lib/store";
 import {
     AVAILABLE_MODELS,
@@ -21,13 +22,13 @@ type TabKey = "draft" | "qa";
 type SupplementalKey = keyof AdvisorSupplementalInput;
 type DraftSectionKey = keyof AdvisorDraftResult["sections"];
 
-const DRAFT_SECTIONS: Array<{ key: DraftSectionKey; label: string }> = [
-    { key: "executiveSummary", label: "Executive Summary (Advisory)" },
-    { key: "mrvDataInventory", label: "MRV Data Inventory" },
-    { key: "scopeNarrative", label: "Scope 2 and Scope 3 Narrative" },
-    { key: "methodologyAndAssumptions", label: "Methodology and Assumptions" },
-    { key: "dataGapsAndEvidence", label: "Data Gaps and Required Evidence" },
-    { key: "nextActions", label: "Next Actions" },
+const DRAFT_SECTIONS: DraftSectionKey[] = [
+    "executiveSummary",
+    "mrvDataInventory",
+    "scopeNarrative",
+    "methodologyAndAssumptions",
+    "dataGapsAndEvidence",
+    "nextActions",
 ];
 
 function HelpTip({ text }: { text: string }) {
@@ -66,6 +67,7 @@ function InputClassName() {
 }
 
 export default function AdvisorPage() {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState<TabKey>("draft");
     const [question, setQuestion] = useState("");
     const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -152,7 +154,7 @@ export default function AdvisorPage() {
     const periodLabel =
         advisorSupplementalInput.reportingPeriodStart && advisorSupplementalInput.reportingPeriodEnd
             ? `${advisorSupplementalInput.reportingPeriodStart} -> ${advisorSupplementalInput.reportingPeriodEnd}`
-            : "Period not set";
+            : t("advisor.periodNotSet");
 
     const inputClass = InputClassName();
 
@@ -185,30 +187,30 @@ export default function AdvisorPage() {
             <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 py-8">
                 <div className="mb-6">
                     <h1 className="text-3xl font-black text-gray-800 dark:text-gray-100">
-                        ESG/MRV Advisor
+                        {t("advisor.title")}
                     </h1>
                     <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-3xl">
-                        Advisory drafting support from your carbon session data. Output is view and copy only.
+                        {t("advisor.subtitle")}
                     </p>
                 </div>
 
                 <div className="mb-5 rounded-xl border border-amber-300/50 bg-amber-100/60 dark:bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
-                    Advisory support only. Not legal advice, not assurance opinion, and not a certified final report.
+                    {t("advisor.disclaimer")}
                 </div>
 
                 {!hasSessionData ? (
                     <div className="rounded-2xl border border-gray-100 dark:border-[#2a2d3a] bg-white/70 dark:bg-[#1e212c]/70 p-8 text-center">
                         <h2 className="text-lg font-bold text-gray-700 dark:text-gray-200">
-                            No session data yet
+                            {t("advisor.noDataTitle")}
                         </h2>
                         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                            Send a few messages in chat first so Advisor can build a draft from real usage data.
+                            {t("advisor.noDataMessage")}
                         </p>
                         <Link
                             href="/chat"
                             className="inline-flex mt-4 rounded-xl bg-gradient-to-r from-[#0FA697] to-[#0FA697]/80 px-4 py-2 text-sm font-bold text-white shadow-sm"
                         >
-                            Go to Chat
+                            {t("advisor.goToChat")}
                         </Link>
                     </div>
                 ) : (
@@ -222,7 +224,7 @@ export default function AdvisorPage() {
                                         : "bg-white/80 dark:bg-[#1a1d27] text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-[#2a2d3a]"
                                 }`}
                             >
-                                Draft
+                                {t("advisor.tabDraft")}
                             </button>
                             <button
                                 onClick={() => setActiveTab("qa")}
@@ -232,7 +234,7 @@ export default function AdvisorPage() {
                                         : "bg-white/80 dark:bg-[#1a1d27] text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-[#2a2d3a]"
                                 }`}
                             >
-                                Q&A
+                                {t("advisor.tabQA")}
                             </button>
                         </div>
 
@@ -240,30 +242,30 @@ export default function AdvisorPage() {
                             <section className="rounded-2xl border border-gray-100 dark:border-[#2a2d3a] bg-white/70 dark:bg-[#1e212c]/70 p-4 space-y-4">
                                 <div>
                                     <h2 className="text-sm font-bold text-gray-700 dark:text-gray-200">
-                                        Session Snapshot
+                                        {t("advisor.snapshotTitle")}
                                     </h2>
                                     {snapshot && (
                                         <div className="mt-2 grid grid-cols-2 gap-2 text-[11px]">
                                             <div className="rounded-lg bg-gray-50 dark:bg-[#1a1d27] p-2">
-                                                <div className="text-gray-400">Scope 2 CO2</div>
+                                                <div className="text-gray-400">{t("advisor.snapshot.scope2")}</div>
                                                 <div className="font-bold text-gray-700 dark:text-gray-200">
                                                     {snapshot.ghg.scope2.toFixed(4)} g
                                                 </div>
                                             </div>
                                             <div className="rounded-lg bg-gray-50 dark:bg-[#1a1d27] p-2">
-                                                <div className="text-gray-400">Total GHG</div>
+                                                <div className="text-gray-400">{t("advisor.snapshot.totalGhg")}</div>
                                                 <div className="font-bold text-gray-700 dark:text-gray-200">
                                                     {snapshot.ghg.totalGHG.toFixed(4)} g
                                                 </div>
                                             </div>
                                             <div className="rounded-lg bg-gray-50 dark:bg-[#1a1d27] p-2">
-                                                <div className="text-gray-400">Energy</div>
+                                                <div className="text-gray-400">{t("advisor.snapshot.energy")}</div>
                                                 <div className="font-bold text-gray-700 dark:text-gray-200">
                                                     {snapshot.sessionStats.totalEnergyWh.toFixed(4)} Wh
                                                 </div>
                                             </div>
                                             <div className="rounded-lg bg-gray-50 dark:bg-[#1a1d27] p-2">
-                                                <div className="text-gray-400">Tokens</div>
+                                                <div className="text-gray-400">{t("advisor.snapshot.tokens")}</div>
                                                 <div className="font-bold text-gray-700 dark:text-gray-200">
                                                     {snapshot.sessionStats.totalTokens}
                                                 </div>
@@ -271,20 +273,20 @@ export default function AdvisorPage() {
                                         </div>
                                     )}
                                     <div className="mt-3 text-xs text-gray-500 dark:text-gray-400 space-y-1">
-                                        <div>Model: <span className="font-semibold">{selectedModelName}</span></div>
-                                        <div>Region: <span className="font-semibold">{regionLabel}</span></div>
-                                        <div>Period: <span className="font-semibold">{periodLabel}</span></div>
+                                        <div>{t("advisor.labels.model")}: <span className="font-semibold">{selectedModelName}</span></div>
+                                        <div>{t("advisor.labels.region")}: <span className="font-semibold">{regionLabel}</span></div>
+                                        <div>{t("advisor.labels.period")}: <span className="font-semibold">{periodLabel}</span></div>
                                     </div>
                                 </div>
 
                                 <div>
                                     <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
-                                        Supplemental Input
+                                        {t("advisor.supplementalTitle")}
                                     </h3>
                                     <div className="space-y-2">
                                         <div>
-                                            <FieldLabel help="Enter the legal entity or business unit covered by this report, for example: ABC Technology JSC.">
-                                                Reporting Entity
+                                            <FieldLabel help={t("advisor.help.reportingEntity")}>
+                                                {t("advisor.fields.reportingEntity")}
                                             </FieldLabel>
                                             <input
                                                 className={inputClass}
@@ -295,8 +297,8 @@ export default function AdvisorPage() {
 
                                         <div className="grid grid-cols-2 gap-2">
                                             <div>
-                                                <FieldLabel help="Enter the reporting period start date in YYYY-MM-DD format.">
-                                                    Period Start
+                                                <FieldLabel help={t("advisor.help.periodStart")}>
+                                                    {t("advisor.fields.periodStart")}
                                                 </FieldLabel>
                                                 <input
                                                     type="date"
@@ -306,8 +308,8 @@ export default function AdvisorPage() {
                                                 />
                                             </div>
                                             <div>
-                                                <FieldLabel help="Enter the reporting period end date in YYYY-MM-DD format.">
-                                                    Period End
+                                                <FieldLabel help={t("advisor.help.periodEnd")}>
+                                                    {t("advisor.fields.periodEnd")}
                                                 </FieldLabel>
                                                 <input
                                                     type="date"
@@ -319,8 +321,8 @@ export default function AdvisorPage() {
                                         </div>
 
                                         <div>
-                                            <FieldLabel help="Define the organizational boundary: parent company, subsidiaries, branches, or joint ventures included.">
-                                                Organizational Boundary
+                                            <FieldLabel help={t("advisor.help.organizationalBoundary")}>
+                                                {t("advisor.fields.organizationalBoundary")}
                                             </FieldLabel>
                                             <input
                                                 className={inputClass}
@@ -330,8 +332,8 @@ export default function AdvisorPage() {
                                         </div>
 
                                         <div>
-                                            <FieldLabel help="Define the operational boundary: included operations and emission sources, such as AI runtime and related infrastructure.">
-                                                Operational Boundary
+                                            <FieldLabel help={t("advisor.help.operationalBoundary")}>
+                                                {t("advisor.fields.operationalBoundary")}
                                             </FieldLabel>
                                             <input
                                                 className={inputClass}
@@ -341,8 +343,8 @@ export default function AdvisorPage() {
                                         </div>
 
                                         <div>
-                                            <FieldLabel help="Specify the reporting methodology standard, for example: GHG Protocol or ISO 14064-1.">
-                                                Methodology Standard
+                                            <FieldLabel help={t("advisor.help.methodologyStandard")}>
+                                                {t("advisor.fields.methodologyStandard")}
                                             </FieldLabel>
                                             <input
                                                 className={inputClass}
@@ -353,39 +355,39 @@ export default function AdvisorPage() {
 
                                         <div className="grid grid-cols-2 gap-2">
                                             <div>
-                                                <FieldLabel help="Choose the Scope 2 inventory approach: location-based or market-based.">
-                                                    Inventory Approach
+                                                <FieldLabel help={t("advisor.help.inventoryApproach")}>
+                                                    {t("advisor.fields.inventoryApproach")}
                                                 </FieldLabel>
                                                 <select
                                                     className={inputClass}
                                                     value={advisorSupplementalInput.inventoryApproach}
                                                     onChange={(e) => handleChange("inventoryApproach", e.target.value)}
                                                 >
-                                                    <option value="location-based">Location-based</option>
-                                                    <option value="market-based">Market-based</option>
-                                                    <option value="unknown">Unknown</option>
+                                                    <option value="location-based">{t("advisor.inventoryApproach.locationBased")}</option>
+                                                    <option value="market-based">{t("advisor.inventoryApproach.marketBased")}</option>
+                                                    <option value="unknown">{t("advisor.inventoryApproach.unknown")}</option>
                                                 </select>
                                             </div>
                                             <div>
-                                                <FieldLabel help="Rate the reliability of input data: High, Medium, or Low.">
-                                                    Data Quality
+                                                <FieldLabel help={t("advisor.help.dataQuality")}>
+                                                    {t("advisor.fields.dataQuality")}
                                                 </FieldLabel>
                                                 <select
                                                     className={inputClass}
                                                     value={advisorSupplementalInput.dataQualityLevel}
                                                     onChange={(e) => handleChange("dataQualityLevel", e.target.value)}
                                                 >
-                                                    <option value="high">High</option>
-                                                    <option value="medium">Medium</option>
-                                                    <option value="low">Low</option>
+                                                    <option value="high">{t("advisor.dataQuality.high")}</option>
+                                                    <option value="medium">{t("advisor.dataQuality.medium")}</option>
+                                                    <option value="low">{t("advisor.dataQuality.low")}</option>
                                                 </select>
                                             </div>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-2">
                                             <div>
-                                                <FieldLabel help="Optional baseline year used to compare emissions trends across periods. Leave blank if unavailable.">
-                                                    Base Year (Optional)
+                                                <FieldLabel help={t("advisor.help.baseYear")}>
+                                                    {t("advisor.fields.baseYear")}
                                                 </FieldLabel>
                                                 <input
                                                     className={inputClass}
@@ -394,8 +396,8 @@ export default function AdvisorPage() {
                                                 />
                                             </div>
                                             <div>
-                                                <FieldLabel help="Enter the report owner or internal reviewer responsible for this draft.">
-                                                    Owner / Reviewer
+                                                <FieldLabel help={t("advisor.help.ownerReviewer")}>
+                                                    {t("advisor.fields.ownerReviewer")}
                                                 </FieldLabel>
                                                 <input
                                                     className={inputClass}
@@ -413,14 +415,14 @@ export default function AdvisorPage() {
                                         disabled={advisorIsGeneratingDraft}
                                         className="w-full rounded-xl bg-gradient-to-r from-[#0FA697] to-[#0FA697]/80 px-4 py-2.5 text-sm font-bold text-white shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
                                     >
-                                        {advisorIsGeneratingDraft ? "Generating..." : "Generate Advisory Draft"}
+                                        {advisorIsGeneratingDraft ? t("advisor.generating") : t("advisor.generateDraft")}
                                     </button>
 
                                     <button
                                         onClick={clearAdvisor}
                                         className="w-full rounded-xl border border-gray-200 dark:border-[#2a2d3a] bg-white dark:bg-[#1a1d27] px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400"
                                     >
-                                        Clear Advisor Data
+                                        {t("advisor.clearData")}
                                     </button>
                                 </div>
 
@@ -436,40 +438,40 @@ export default function AdvisorPage() {
                                     <>
                                         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                                             <h2 className="text-base font-bold text-gray-700 dark:text-gray-200">
-                                                Advisory Draft
+                                                {t("advisor.draftTitle")}
                                             </h2>
                                             {advisorDraft && (
                                                 <button
                                                     onClick={() => copyText(advisorDraft.fullText, "full")}
                                                     className="rounded-lg border border-gray-200 dark:border-[#2a2d3a] bg-white dark:bg-[#1a1d27] px-3 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400"
                                                 >
-                                                    {copiedKey === "full" ? "Copied" : "Copy Full"}
+                                                    {copiedKey === "full" ? t("advisor.copied") : t("advisor.copyFull")}
                                                 </button>
                                             )}
                                         </div>
 
                                         {advisorDraft ? (
                                             <div className="space-y-3">
-                                                {DRAFT_SECTIONS.map((section) => {
-                                                    const content = advisorDraft.sections[section.key] || "";
+                                                {DRAFT_SECTIONS.map((sectionKey) => {
+                                                    const content = advisorDraft.sections[sectionKey] || "";
                                                     return (
                                                         <div
-                                                            key={section.key}
+                                                            key={sectionKey}
                                                             className="rounded-xl border border-gray-100 dark:border-[#2a2d3a] bg-white/80 dark:bg-[#1a1d27]/80 p-3"
                                                         >
                                                             <div className="mb-2 flex items-center justify-between gap-2">
                                                                 <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                                                                    {section.label}
+                                                                    {t(`advisor.sections.${sectionKey}`)}
                                                                 </h3>
                                                                 <button
-                                                                    onClick={() => copyText(content, section.key)}
+                                                                    onClick={() => copyText(content, sectionKey)}
                                                                     className="rounded-md bg-[#0FA697]/10 px-2 py-1 text-[11px] font-semibold text-[#0FA697]"
                                                                 >
-                                                                    {copiedKey === section.key ? "Copied" : "Copy"}
+                                                                    {copiedKey === sectionKey ? t("advisor.copied") : t("advisor.copy")}
                                                                 </button>
                                                             </div>
                                                             <div className="text-sm text-gray-600 dark:text-gray-300">
-                                                                <AIResponseRenderer content={content || "No content in this section."} variant="compare" />
+                                                                <AIResponseRenderer content={content || t("advisor.sectionEmpty")} variant="compare" />
                                                             </div>
                                                         </div>
                                                     );
@@ -477,7 +479,7 @@ export default function AdvisorPage() {
                                             </div>
                                         ) : (
                                             <div className="h-full min-h-[260px] flex items-center justify-center text-center text-sm text-gray-400 dark:text-gray-500">
-                                                Generate draft to see sectioned ESG/MRV advisory output.
+                                                {t("advisor.draftEmpty")}
                                             </div>
                                         )}
                                     </>
@@ -485,10 +487,10 @@ export default function AdvisorPage() {
                                     <>
                                         <div className="mb-3 flex flex-wrap items-center gap-2 text-[11px]">
                                             <span className="rounded-full bg-[#0FA697]/10 px-2 py-1 font-semibold text-[#0FA697]">
-                                                Region: {regionLabel}
+                                                {t("advisor.labels.region")}: {regionLabel}
                                             </span>
                                             <span className="rounded-full bg-gray-100 dark:bg-[#1a1d27] px-2 py-1 text-gray-500 dark:text-gray-400">
-                                                Scope mode: {advisorSupplementalInput.inventoryApproach}
+                                                {t("advisor.labels.scopeMode")}: {advisorSupplementalInput.inventoryApproach}
                                             </span>
                                             <span className="rounded-full bg-gray-100 dark:bg-[#1a1d27] px-2 py-1 text-gray-500 dark:text-gray-400">
                                                 {periodLabel}
@@ -497,21 +499,21 @@ export default function AdvisorPage() {
 
                                         {!advisorDraft ? (
                                             <div className="rounded-xl border border-dashed border-gray-200 dark:border-[#2a2d3a] p-6 text-center text-sm text-gray-400 dark:text-gray-500">
-                                                Generate draft first, then ask follow-up questions here.
+                                                {t("advisor.qaEmpty")}
                                             </div>
                                         ) : (
                                             <div className="space-y-3">
                                                 <div className="rounded-xl border border-gray-100 dark:border-[#2a2d3a] bg-white/80 dark:bg-[#1a1d27]/80 p-3 max-h-[420px] overflow-y-auto custom-scrollbar space-y-3">
                                                     {advisorQAHistory.length === 0 && (
                                                         <div className="text-sm text-gray-400 dark:text-gray-500">
-                                                            Ask anything about MRV structure, assumptions, gaps, and next actions.
+                                                            {t("advisor.qaHint")}
                                                         </div>
                                                     )}
 
                                                     {advisorQAHistory.map((entry) => (
                                                         <div key={entry.id} className="space-y-1">
                                                             <div className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase">
-                                                                {entry.role === "user" ? "You" : "Advisor"}
+                                                                {entry.role === "user" ? t("advisor.qa.you") : t("advisor.qa.advisor")}
                                                             </div>
                                                             <div
                                                                 className={`rounded-xl px-3 py-2 text-sm ${
@@ -535,7 +537,7 @@ export default function AdvisorPage() {
                                                         value={question}
                                                         onChange={(e) => setQuestion(e.target.value)}
                                                         rows={3}
-                                                        placeholder="Ask follow-up based on this advisory draft..."
+                                                        placeholder={t("advisor.qaPlaceholder")}
                                                         className="w-full rounded-xl border border-gray-200 dark:border-[#2a2d3a] bg-white dark:bg-[#121620] px-3 py-2 text-sm text-gray-700 dark:text-gray-200 focus:border-[#0FA697] focus:outline-none resize-none"
                                                     />
                                                     <div className="mt-2 flex justify-end">
@@ -544,7 +546,7 @@ export default function AdvisorPage() {
                                                             disabled={!question.trim() || advisorIsAsking}
                                                             className="rounded-xl bg-gradient-to-r from-[#0FA697] to-[#0FA697]/80 px-4 py-2 text-sm font-bold text-white disabled:opacity-60 disabled:cursor-not-allowed"
                                                         >
-                                                            {advisorIsAsking ? "Thinking..." : "Ask Advisor"}
+                                                            {advisorIsAsking ? t("advisor.thinking") : t("advisor.askAdvisor")}
                                                         </button>
                                                     </div>
                                                 </div>

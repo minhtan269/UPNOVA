@@ -3,8 +3,10 @@
 import { useEffect } from "react";
 import { useACRMStore } from "@/lib/store";
 import { AVAILABLE_REGIONS, GLOBAL_CI_FALLBACK } from "@/lib/carbon-constants";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 export default function RegionSelector() {
+    const { t } = useTranslation();
     const selectedRegion = useACRMStore((s) => s.selectedRegion);
     const setRegion = useACRMStore((s) => s.setRegion);
     const isCILive = useACRMStore((s) => s.isCILive);
@@ -39,7 +41,7 @@ export default function RegionSelector() {
                 htmlFor="region-select"
                 className="text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap"
             >
-                Region:
+                {t("regionSelector.label")}
             </label>
 
             <div className="relative">
@@ -74,11 +76,11 @@ export default function RegionSelector() {
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
                         </span>
-                        LIVE
+                        {t("regionSelector.liveBadge")}
                     </span>
                 ) : (
                     <span className="rounded-full bg-gray-500/15 px-2 py-0.5 text-[10px] font-medium text-gray-400">
-                        Static
+                        {t("regionSelector.staticBadge")}
                     </span>
                 )}
                 <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">

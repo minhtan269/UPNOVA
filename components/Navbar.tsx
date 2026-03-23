@@ -4,20 +4,23 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import ThemeToggle from "./ThemeToggle";
+import LanguageSwitcher from "./LanguageSwitcher";
 import { useState } from "react";
-
-const NAV_ITEMS = [
-    { href: "/", label: "Home" },
-    { href: "/chat", label: "AI Chat" },
-    { href: "/advisor", label: "Advisor" },
-    { href: "/compare", label: "Compare" },
-    { href: "/analytics", label: "Analytics" },
-    { href: "/team", label: "Team" },
-];
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 export default function Navbar() {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const { t } = useTranslation();
+
+    const navItems = [
+        { href: "/", label: t("navbar.home") },
+        { href: "/chat", label: t("navbar.chat") },
+        { href: "/advisor", label: t("navbar.advisor") },
+        { href: "/compare", label: t("navbar.compare") },
+        { href: "/analytics", label: t("navbar.analytics") },
+        { href: "/team", label: t("navbar.team") },
+    ];
 
     return (
         <nav className="sticky top-0 z-40 border-b border-gray-200/60 dark:border-[#2a2d3a] bg-white/70 dark:bg-[#13151d]/80 backdrop-blur-xl">
@@ -35,13 +38,13 @@ export default function Navbar() {
                             ACRM
                         </h1>
                         <p className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold tracking-widest uppercase">
-                            AI Carbon-Resilience Management
+                            {t("navbar.logoSubtitle")}
                         </p>
                     </div>
                 </Link>
 
                 <div className="hidden md:flex items-center gap-1">
-                    {NAV_ITEMS.map((item) => {
+                    {navItems.map((item) => {
                         const isActive = pathname === item.href;
                         return (
                             <Link
@@ -60,19 +63,20 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex items-center gap-2">
+                    <LanguageSwitcher />
                     <ThemeToggle />
 
                     <Link
                         href="/chat"
                         className="hidden sm:inline-flex rounded-xl bg-gradient-to-r from-[#0FA697] to-[#0FA697]/80 px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:shadow-lg hover:scale-105"
                     >
-                        Start Chat -&gt;
+                        {t("navbar.startChat")}
                     </Link>
 
                     <button
                         onClick={() => setMobileOpen(!mobileOpen)}
                         className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg hover:bg-gray-100/50 dark:hover:bg-white/10 transition-colors"
-                        aria-label="Toggle navigation menu"
+                        aria-label={t("navbar.toggleMenu")}
                     >
                         <svg className="h-5 w-5 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             {mobileOpen ? (
@@ -88,7 +92,7 @@ export default function Navbar() {
             {mobileOpen && (
                 <div className="md:hidden border-t border-gray-200/60 dark:border-[#2a2d3a] bg-white/90 dark:bg-[#13151d]/95 backdrop-blur-xl animate-fade-in">
                     <div className="px-4 py-3 space-y-1">
-                        {NAV_ITEMS.map((item) => {
+                        {navItems.map((item) => {
                             const isActive = pathname === item.href;
                             return (
                                 <Link
@@ -110,7 +114,7 @@ export default function Navbar() {
                             onClick={() => setMobileOpen(false)}
                             className="block rounded-xl bg-gradient-to-r from-[#0FA697] to-[#0FA697]/80 px-5 py-3 text-base font-bold text-white text-center shadow-md mt-2"
                         >
-                            Start Chat -&gt;
+                            {t("navbar.startChat")}
                         </Link>
                     </div>
                 </div>

@@ -2,8 +2,10 @@
 
 import { useEffect } from "react";
 import { useACRMStore } from "@/lib/store";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 export default function SmartRecommendation() {
+    const { t } = useTranslation();
     const recommendation = useACRMStore((s) => s.recommendation);
     const routingSuggestion = useACRMStore((s) => s.routingSuggestion);
     const dismiss = useACRMStore((s) => s.dismissRecommendation);
@@ -33,7 +35,7 @@ export default function SmartRecommendation() {
 
                     <div className="flex-1">
                         <h4 className="text-sm font-bold text-[#0FA697]">
-                            🧠 Smart Model Router
+                            {t("smartRecommendation.title")}
                         </h4>
                         <p className="mt-1 text-xs leading-relaxed text-gray-700 dark:text-gray-300">
                             {recommendation}
@@ -49,7 +51,7 @@ export default function SmartRecommendation() {
                                     <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                     </svg>
-                                    Switch to {routingSuggestion.suggestedModelName}
+                                    {t("smartRecommendation.switchTo").replace("{model}", routingSuggestion.suggestedModelName)}
                                 </button>
                                 {routingSuggestion.carbonSaving > 0 && (
                                     <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">

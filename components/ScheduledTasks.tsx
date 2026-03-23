@@ -2,8 +2,10 @@
 
 import { useACRMStore } from "@/lib/store";
 import { formatSlotTime } from "@/lib/carbon-intensity-api";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 export default function ScheduledTasks() {
+    const { t } = useTranslation();
     const scheduledTasks = useACRMStore((s) => s.scheduledTasks);
     const cancelScheduled = useACRMStore((s) => s.cancelScheduled);
     const runScheduledNow = useACRMStore((s) => s.runScheduledNow);
@@ -18,11 +20,11 @@ export default function ScheduledTasks() {
             <div className="flex items-center gap-2 mb-3">
                 <span className="text-base">⏰</span>
                 <h3 className="text-sm font-semibold text-gray-800 dark:text-white">
-                    Scheduled Tasks
+                    {t("scheduledTasks.title")}
                 </h3>
                 {activeTasks.length > 0 && (
                     <span className="rounded-full bg-[#0FA697]/15 px-2 py-0.5 text-[10px] font-semibold text-[#0FA697]">
-                        {activeTasks.length} queued
+                        {t("scheduledTasks.queued").replace("{n}", String(activeTasks.length))}
                     </span>
                 )}
             </div>
@@ -54,13 +56,13 @@ export default function ScheduledTasks() {
                                     onClick={() => runScheduledNow(task.id)}
                                     className="rounded-md bg-[#0FA697] px-2 py-1 text-[10px] font-semibold text-white hover:bg-[#0d8f83] transition-colors"
                                 >
-                                    Run Now
+                                    {t("scheduledTasks.runNow")}
                                 </button>
                                 <button
                                     onClick={() => cancelScheduled(task.id)}
                                     className="rounded-md bg-gray-500/20 px-2 py-1 text-[10px] text-gray-400 hover:bg-gray-500/30 transition-colors"
                                 >
-                                    Cancel
+                                    {t("scheduledTasks.cancel")}
                                 </button>
                             </div>
                         </div>
@@ -70,7 +72,7 @@ export default function ScheduledTasks() {
                 {/* Completed/cancelled tasks (collapsed) */}
                 {completedTasks.length > 0 && (
                     <div className="pt-1 border-t border-gray-200 dark:border-[#2a2d3a]">
-                        <p className="text-[10px] text-gray-400 mb-1">Past tasks</p>
+                        <p className="text-[10px] text-gray-400 mb-1">{t("scheduledTasks.pastTasks")}</p>
                         {completedTasks.slice(-3).map((task) => (
                             <div key={task.id} className="flex items-center gap-2 py-0.5">
                                 <span className="text-[10px]">

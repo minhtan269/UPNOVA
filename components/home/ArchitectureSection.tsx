@@ -1,46 +1,33 @@
 "use client";
 
-const LAYERS = [
-    {
-        number: "01",
-        name: "Data Collection",
-        desc: "Collects AI metadata: token count, model type, processing time.",
-        color: "#0FA697",
-        icon: "📡",
-    },
-    {
-        number: "02",
-        name: "Carbon Calculation",
-        desc: "Calculates energy & CO₂ based on V2 formula (Model-specific J/token).",
-        color: "#AED911",
-        icon: "🧮",
-    },
-    {
-        number: "03",
-        name: "Optimization",
-        desc: "Smart Routing suggests optimal models & Green Hours scheduling.",
-        color: "#D9CD2B",
-        icon: "⚡",
-    },
-    {
-        number: "04",
-        name: "Resilience Assessment",
-        desc: "Evaluates 3 Resilience indexes for enterprise risk governance.",
-        color: "#D91A1A",
-        icon: "🛡️",
-    },
-];
+import { useTranslation } from "@/lib/i18n/useTranslation";
+
+const LAYER_META = [
+    { number: "01", color: "#0FA697", icon: "📡" },
+    { number: "02", color: "#AED911", icon: "🧮" },
+    { number: "03", color: "#D9CD2B", icon: "⚡" },
+    { number: "04", color: "#D91A1A", icon: "🛡️" },
+] as const;
 
 export default function ArchitectureSection() {
+    const { t } = useTranslation();
+
+    const LAYERS = [
+        { ...LAYER_META[0], name: t("architecture.layer1Name"), desc: t("architecture.layer1Desc") },
+        { ...LAYER_META[1], name: t("architecture.layer2Name"), desc: t("architecture.layer2Desc") },
+        { ...LAYER_META[2], name: t("architecture.layer3Name"), desc: t("architecture.layer3Desc") },
+        { ...LAYER_META[3], name: t("architecture.layer4Name"), desc: t("architecture.layer4Desc") },
+    ];
+
     return (
         <section className="py-24 bg-white/40 dark:bg-white/[0.02]">
             <div className="mx-auto max-w-7xl px-6">
                 <div className="text-center mb-16">
                     <h2 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 mb-3">
-                        4-Layer Architecture
+                        {t("architecture.sectionTitle")}
                     </h2>
                     <p className="text-base text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-                        Closed-loop data flow from collection to governance reporting.
+                        {t("architecture.sectionSubtitle")}
                     </p>
                 </div>
 

@@ -10,6 +10,7 @@ import {
     clearAllSessions,
     type SavedSession,
 } from "@/lib/session-manager";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 function inferSessionStartFromMessages(messages: { timestamp: number }[]): number | null {
     const timestamps = messages
@@ -21,6 +22,7 @@ function inferSessionStartFromMessages(messages: { timestamp: number }[]): numbe
 }
 
 export default function SessionHistory() {
+    const { t } = useTranslation();
     const [sessions, setSessions] = useState<SavedSession[]>(() => getSavedSessions());
     const [isOpen, setIsOpen] = useState(false);
     const [justSaved, setJustSaved] = useState(false);
@@ -108,7 +110,7 @@ export default function SessionHistory() {
         <div className="rounded-xl border border-gray-100 dark:border-[#2a2d3a] bg-white/60 dark:bg-[#1e212c]/60 backdrop-blur-sm shadow-sm p-3">
             <div className="flex items-center justify-between mb-2">
                 <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400">
-                    Session History
+                    {t("sessionHistory.title")}
                 </h3>
                 <div className="flex gap-1.5">
                     <button
@@ -117,14 +119,14 @@ export default function SessionHistory() {
                         className="rounded-lg bg-[#0FA697]/10 px-2.5 py-1 text-[10px] font-semibold text-[#0FA697]
                          transition-all hover:bg-[#0FA697]/20 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                        {justSaved ? "Saved" : "Save"}
+                        {justSaved ? t("sessionHistory.saved") : t("sessionHistory.save")}
                     </button>
                     <button
                         onClick={() => setIsOpen(!isOpen)}
                         className="rounded-lg bg-gray-100 dark:bg-[#1a1d27] px-2.5 py-1 text-[10px] font-semibold text-gray-500 dark:text-gray-400
                          transition-all hover:bg-gray-200 dark:hover:bg-white/10"
                     >
-                        {isOpen ? "Close" : `Browse (${sessions.length})`}
+                        {isOpen ? t("sessionHistory.close") : t("sessionHistory.browse").replace("{n}", String(sessions.length))}
                     </button>
                 </div>
             </div>
@@ -133,7 +135,7 @@ export default function SessionHistory() {
                 <div className="mt-2 space-y-1.5 max-h-[200px] overflow-y-auto custom-scrollbar">
                     {sessions.length === 0 ? (
                         <div className="text-center text-[10px] text-gray-400 py-4">
-                            No saved sessions yet. Save your current session to see it here.
+                            {t("sessionHistory.empty")}
                         </div>
                     ) : (
                         <>
@@ -162,7 +164,7 @@ export default function SessionHistory() {
                                              text-[#0FA697] hover:bg-[#0FA697]/20 transition-all flex-shrink-0"
                                             title="Load this session"
                                         >
-                                            Load
+                                            {t("sessionHistory.load")}
                                         </button>
                                         <button
                                             onClick={() => handleDelete(s.id)}
@@ -182,7 +184,7 @@ export default function SessionHistory() {
                                     className="w-full text-center text-[9px] text-gray-400 hover:text-red-400
                                      transition-colors py-1"
                                 >
-                                    Clear all saved sessions
+                                    {t("sessionHistory.clearAll")}
                                 </button>
                             )}
                         </>

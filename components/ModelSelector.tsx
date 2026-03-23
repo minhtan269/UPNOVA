@@ -2,6 +2,7 @@
 
 import { useACRMStore } from "@/lib/store";
 import { AVAILABLE_MODELS } from "@/lib/carbon-constants";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 const CLASS_COLORS: Record<string, string> = {
     small: "bg-[#0FA697]",
@@ -10,6 +11,7 @@ const CLASS_COLORS: Record<string, string> = {
 };
 
 export default function ModelSelector() {
+    const { t } = useTranslation();
     const selectedModelId = useACRMStore((s) => s.selectedModelId);
     const setModel = useACRMStore((s) => s.setModel);
 
@@ -21,7 +23,7 @@ export default function ModelSelector() {
                 htmlFor="model-select"
                 className="text-sm font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap"
             >
-                AI Model:
+                {t("modelSelector.label")}
             </label>
 
             <div className="relative">

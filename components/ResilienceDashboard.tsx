@@ -41,6 +41,7 @@ import {
     Legend,
 } from "recharts";
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 // ---- Stat Card ----
 function StatCard({
@@ -162,6 +163,7 @@ function BaselineComparison({
     messages: Array<{ metrics: { totalTokens: number; inputTokens: number; outputTokens: number }; role: string }>;
     selectedRegion: string;
 }) {
+    const { t } = useTranslation();
     const [scenario, setScenario] = useState(0);
     const ci =
         CARBON_INTENSITY_BY_REGION[selectedRegion as Region] ?? GLOBAL_CI_FALLBACK;
@@ -181,10 +183,10 @@ function BaselineComparison({
         return (
             <div className="rounded-xl border border-gray-100 bg-white/60 p-3 backdrop-blur-sm shadow-sm">
                 <h3 className="text-xs font-semibold text-gray-600 mb-2">
-                    Carbon Savings vs Baseline
+                    {t("resilienceDashboard.carbonSavingsTitle")}
                 </h3>
                 <div className="text-xs text-gray-400 text-center py-2">
-                    Send messages to see savings
+                    {t("resilienceDashboard.carbonSavingsEmpty")}
                 </div>
             </div>
         );
@@ -194,33 +196,37 @@ function BaselineComparison({
         <div className="rounded-xl border border-gray-100 bg-white/60 p-3 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between mb-2">
                 <h3 className="text-xs font-semibold text-gray-600">
-                    Carbon Savings vs Baseline
+                    {t("resilienceDashboard.carbonSavingsTitle")}
                 </h3>
             </div>
             {/* Scenario selector */}
             <div className="flex gap-1 mb-2">
-                {BASELINE_SCENARIOS.map((sc, i) => (
+                {[
+                    t("resilienceDashboard.scenarioAllLarge"),
+                    t("resilienceDashboard.scenarioIndustryAvg"),
+                    t("resilienceDashboard.scenarioAllSmall"),
+                ].map((label, i) => (
                     <button
-                        key={sc.id}
+                        key={i}
                         onClick={() => setScenario(i)}
                         className={`flex-1 rounded-lg py-1 text-[9px] font-semibold transition-all ${scenario === i
                             ? "bg-[#0FA697] text-white shadow-sm"
                             : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                             }`}
                     >
-                        {sc.label}
+                        {label}
                     </button>
                 ))}
             </div>
             <div className="grid grid-cols-2 gap-2 text-center">
                 <div className="rounded-lg bg-gray-100/60 p-2">
-                    <div className="text-[10px] text-gray-400 mb-0.5">Baseline CO2</div>
+                    <div className="text-[10px] text-gray-400 mb-0.5">{t("resilienceDashboard.baselineCO2")}</div>
                     <div className="text-sm font-bold text-gray-600">
                         {baselineCO2.toFixed(4)}g
                     </div>
                 </div>
                 <div className="rounded-lg bg-[#0FA697]/10 p-2">
-                    <div className="text-[10px] text-gray-400 mb-0.5">Actual Scope 2 CO2</div>
+                    <div className="text-[10px] text-gray-400 mb-0.5">{t("resilienceDashboard.actualScope2CO2")}</div>
                     <div className="text-sm font-bold text-[#0FA697]">
                         {actualCO2.toFixed(4)}g
                     </div>
@@ -229,7 +235,7 @@ function BaselineComparison({
             {saved > 0 ? (
                 <div className="mt-2 rounded-lg bg-gradient-to-r from-[#0FA697]/10 to-[#AED911]/10 p-2 text-center">
                     <span className="text-sm font-bold text-[#0FA697]">
-                        Saved {savedPct.toFixed(1)}%
+                        {t("resilienceDashboard.savedPct").replace("{n}", savedPct.toFixed(1))}
                     </span>
                     <span className="text-[10px] text-gray-500 ml-1">
                         ({saved.toFixed(4)}g CO2)
@@ -238,13 +244,15 @@ function BaselineComparison({
             ) : saved < 0 ? (
                 <div className="mt-2 rounded-lg bg-[#D91A1A]/10 p-2 text-center">
                     <span className="text-xs font-bold text-[#D91A1A]">
-                        {Math.abs(savedPct).toFixed(1)}% more CO2 than {s.label}
+                        {t("resilienceDashboard.moreCO2Than")
+                            .replace("{n}", Math.abs(savedPct).toFixed(1))
+                            .replace("{label}", BASELINE_SCENARIOS[scenario].label)}
                     </span>
                 </div>
             ) : (
                 <div className="mt-2 rounded-lg bg-gray-100 p-2 text-center">
                     <span className="text-xs font-bold text-gray-500">
-                        Same as baseline
+                        {t("resilienceDashboard.sameAsBaseline")}
                     </span>
                 </div>
             )}
@@ -260,16 +268,17 @@ function ModelBreakdownChart({
 }: {
     messages: Array<{ role: string; modelId: string; metrics: { co2Grams: number; totalTokens: number } }>;
 }) {
+    const { t } = useTranslation();
     const aiMessages = messages.filter((m) => m.role === "assistant");
 
     if (aiMessages.length === 0) {
         return (
             <div className="rounded-xl border border-gray-100 bg-white/60 p-3 backdrop-blur-sm shadow-sm">
                 <h3 className="text-xs font-semibold text-gray-600 mb-2">
-                    CO2 by Model
+                    {t("resilienceDashboard.co2ByModelTitle")}
                 </h3>
                 <div className="text-xs text-gray-400 text-center py-2">
-                    Send messages to see analysis
+                    {t("resilienceDashboard.co2ByModelEmpty")}
                 </div>
             </div>
         );
@@ -302,7 +311,7 @@ function ModelBreakdownChart({
     return (
         <div className="rounded-xl border border-gray-100 bg-white/60 p-3 backdrop-blur-sm shadow-sm">
             <h3 className="text-xs font-semibold text-gray-600 mb-2">
-                CO2 by Model
+                {t("resilienceDashboard.co2ByModelTitle")}
             </h3>
             <ResponsiveContainer width="100%" height={130}>
                 <PieChart>
@@ -367,6 +376,7 @@ function ForecastCard({
     resilienceHistory: { timestamp: number; carbonExposure: number }[];
     messages: ForecastMessageInput[];
 }) {
+    const { t } = useTranslation();
     const forecast = predictDailyCarbon(
         totalCO2,
         sessionStartTime,
@@ -376,23 +386,23 @@ function ForecastCard({
     );
 
     const statusConfig = {
-        "on-track": { bg: "bg-emerald-500/15", text: "text-emerald-400", icon: "OK", label: "On Track" },
-        "exceeding": { bg: "bg-amber-500/15", text: "text-amber-400", icon: "WARN", label: "Exceeding" },
-        "critical": { bg: "bg-red-500/15", text: "text-red-400", icon: "ALERT", label: "Critical" },
+        "on-track": { bg: "bg-emerald-500/15", text: "text-emerald-400", icon: t("resilienceDashboard.forecastStatusOK").split(" ")[0], label: t("resilienceDashboard.forecastStatusOK").split(" ").slice(1).join(" ") },
+        "exceeding": { bg: "bg-amber-500/15", text: "text-amber-400", icon: t("resilienceDashboard.forecastStatusWarn").split(" ")[0], label: t("resilienceDashboard.forecastStatusWarn").split(" ").slice(1).join(" ") },
+        "critical": { bg: "bg-red-500/15", text: "text-red-400", icon: t("resilienceDashboard.forecastStatusAlert").split(" ")[0], label: t("resilienceDashboard.forecastStatusAlert").split(" ").slice(1).join(" ") },
     };
 
     const status = forecast.isReady
         ? statusConfig[forecast.budgetStatus]
-        : { bg: "bg-slate-500/15", text: "text-slate-300", icon: "...", label: "Warming up" };
+        : { bg: "bg-slate-500/15", text: "text-slate-300", icon: "...", label: t("resilienceDashboard.forecastStatusWarmup").replace("... ", "") };
 
     return (
         <div className="px-4 pb-3">
             <h3 className="text-xs font-semibold text-gray-600 mb-2">
-                Carbon Forecast
+                {t("resilienceDashboard.forecastTitle")}
             </h3>
             <div className="rounded-xl border border-gray-200 dark:border-[#2a2d3a] bg-white/80 dark:bg-[#1a1d27] p-3">
                 <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] text-gray-400">Predicted End-of-Day</span>
+                    <span className="text-[10px] text-gray-400">{t("resilienceDashboard.forecastPredictedEOD")}</span>
                     <span className={`rounded-full ${status.bg} px-2 py-0.5 text-[10px] font-semibold ${status.text}`}>
                         {status.icon} {status.label}
                     </span>
@@ -403,25 +413,25 @@ function ForecastCard({
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-2 text-[10px]">
                     <div>
-                        <span className="text-gray-400">Effective Rate</span>
+                        <span className="text-gray-400">{t("resilienceDashboard.forecastEffectiveRate")}</span>
                         <p className="font-semibold text-gray-600 dark:text-gray-300">
                             {forecast.effectiveRatePerHour.toFixed(3)} g/hr
                         </p>
                     </div>
                     <div>
-                        <span className="text-gray-400">Predicted EOD Used</span>
+                        <span className="text-gray-400">{t("resilienceDashboard.forecastPredictedEODUsed")}</span>
                         <p className={`font-semibold ${forecast.isReady && forecast.predictedBudgetUsedPct > 100 ? "text-red-400" : "text-gray-600 dark:text-gray-300"}`}>
                             {forecast.predictedBudgetUsedPct}%
                         </p>
                     </div>
                     <div>
-                        <span className="text-gray-400">Current Used</span>
+                        <span className="text-gray-400">{t("resilienceDashboard.forecastCurrentUsed")}</span>
                         <p className="font-semibold text-gray-600 dark:text-gray-300">
                             {forecast.currentBudgetUsedPct}%
                         </p>
                     </div>
                     <div>
-                        <span className="text-gray-400">Confidence</span>
+                        <span className="text-gray-400">{t("resilienceDashboard.forecastConfidence")}</span>
                         <p className="font-semibold text-gray-600 dark:text-gray-300 capitalize">
                             {forecast.confidence} | {forecast.assistantSamples} samples
                         </p>
@@ -447,6 +457,7 @@ function ForecastCard({
 
 // ---- Main Dashboard ----
 export default function ResilienceDashboard() {
+    const { t } = useTranslation();
     const sessionStats = useACRMStore((s) => s.sessionStats);
     const messages = useACRMStore((s) => s.messages);
     const clearSession = useACRMStore((s) => s.clearSession);
@@ -496,9 +507,9 @@ export default function ResilienceDashboard() {
                         </svg>
                     </div>
                     <div>
-                        <h2 className="text-sm font-bold text-gray-800">Resilience Dashboard</h2>
+                        <h2 className="text-sm font-bold text-gray-800">{t("resilienceDashboard.title")}</h2>
                         <p className="text-[10px] text-gray-400">
-                            {regionInfo ? `${regionInfo.flag} ${regionInfo.label} - ${regionInfo.ci} gCO2/kWh` : "Real-time carbon monitoring"}
+                            {regionInfo ? `${regionInfo.flag} ${regionInfo.label} - ${regionInfo.ci} gCO2/kWh` : t("resilienceDashboard.subtitle")}
                         </p>
                     </div>
                 </div>
@@ -508,30 +519,30 @@ export default function ResilienceDashboard() {
             <div className="grid grid-cols-2 gap-2 p-4">
                 <StatCard
                     icon="CO2"
-                    label="Scope 2 CO2"
+                    label={t("resilienceDashboard.statScope2")}
                     value={sessionStats.totalCO2 < 0.01 ? sessionStats.totalCO2.toExponential(2) : sessionStats.totalCO2.toFixed(4)}
-                    unit="grams"
+                    unit={t("resilienceDashboard.unitGrams")}
                     color="text-[#0FA697]"
                 />
                 <StatCard
                     icon="E"
-                    label="Energy Used"
+                    label={t("resilienceDashboard.statEnergy")}
                     value={sessionStats.totalEnergyWh < 0.01 ? sessionStats.totalEnergyWh.toExponential(2) : sessionStats.totalEnergyWh.toFixed(4)}
-                    unit="Wh"
+                    unit={t("resilienceDashboard.unitWh")}
                     color="text-[#D9CD2B]"
                 />
                 <StatCard
                     icon="TOK"
-                    label="Total Tokens"
+                    label={t("resilienceDashboard.statTokens")}
                     value={sessionStats.totalTokens.toLocaleString()}
-                    unit="tokens"
+                    unit={t("resilienceDashboard.unitTokens")}
                     color="text-gray-700"
                 />
                 <StatCard
                     icon="EQ"
-                    label="Equivalent To"
+                    label={t("resilienceDashboard.statEquivalent")}
                     value={smartphoneCharges < 0.0001 ? smartphoneCharges.toExponential(2) : smartphoneCharges.toFixed(4)}
-                    unit="charges"
+                    unit={t("resilienceDashboard.unitCharges")}
                     color="text-[#AED911]"
                 />
             </div>
@@ -559,7 +570,7 @@ export default function ResilienceDashboard() {
             {/* ---- Phase 4: Resilience Scores ---- */}
             <div className="px-4 pb-3">
                 <h3 className="text-xs font-semibold text-gray-600 mb-2">
-                    Resilience Indexes (Layer 4)
+                    {t("resilienceDashboard.resilienceIndexesTitle")}
                 </h3>
                 {/* Radar Chart */}
                 <div className="mb-3">
@@ -586,19 +597,19 @@ export default function ResilienceDashboard() {
                 <div className="space-y-2">
                     <ScoreGauge
                         icon="EXP"
-                        label="Carbon Exposure"
+                        label={t("resilienceDashboard.gaugeExposure")}
                         score={resilience.carbonExposure}
                         levelLabel={resilience.carbonExposureLabel}
                     />
                     <ScoreGauge
                         icon="COST"
-                        label="Cost Shock"
+                        label={t("resilienceDashboard.gaugeCostShock")}
                         score={resilience.costShockIndex}
                         levelLabel={resilience.costShockLabel}
                     />
                     <ScoreGauge
                         icon="RES"
-                        label="Resilience Score"
+                        label={t("resilienceDashboard.gaugeResilience")}
                         score={resilience.resilienceScore}
                         levelLabel={resilience.resilienceLabel}
                         invert
@@ -609,7 +620,7 @@ export default function ResilienceDashboard() {
                 {resilienceHistory.length > 1 && (
                     <div className="mt-3">
                         <h4 className="text-[10px] font-semibold text-gray-500 mb-1">
-                            Score Trend
+                            {t("resilienceDashboard.scoreTrend")}
                         </h4>
                         <ResponsiveContainer width="100%" height={120}>
                             <LineChart data={resilienceHistory.map((h, i) => ({

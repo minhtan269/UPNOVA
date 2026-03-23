@@ -2,6 +2,7 @@
 
 import { useACRMStore } from "@/lib/store";
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 const PRESETS = [
     { label: "1g", value: 1 },
@@ -11,6 +12,7 @@ const PRESETS = [
 ];
 
 export default function CarbonBudget() {
+    const { t } = useTranslation();
     const carbonBudget = useACRMStore((s) => s.carbonBudget);
     const setCarbonBudget = useACRMStore((s) => s.setCarbonBudget);
     const totalCO2 = useACRMStore((s) => s.sessionStats.totalCO2);
@@ -26,19 +28,19 @@ export default function CarbonBudget() {
 
     if (usedPct >= 100) {
         ringColor = "#D91A1A";
-        statusLabel = "Budget exceeded!";
+        statusLabel = t("carbonBudget.statusExceeded");
         statusColor = "text-[#D91A1A]";
     } else if (usedPct >= 85) {
         ringColor = "#D91A1A";
-        statusLabel = "Near limit!";
+        statusLabel = t("carbonBudget.statusNearLimit");
         statusColor = "text-[#D91A1A]";
     } else if (usedPct >= 60) {
         ringColor = "#D9CD2B";
-        statusLabel = "Warning";
+        statusLabel = t("carbonBudget.statusWarning");
         statusColor = "text-[#b8a800]";
     } else {
         ringColor = "#0FA697";
-        statusLabel = "Good";
+        statusLabel = t("carbonBudget.statusGood");
         statusColor = "text-[#0FA697]";
     }
 
@@ -51,13 +53,13 @@ export default function CarbonBudget() {
         <div className="rounded-xl border border-gray-100 dark:border-[#2a2d3a] bg-white/60 dark:bg-[#1e212c]/60 p-3 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between mb-2">
                 <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400">
-                    💰 Carbon Budget
+                    {t("carbonBudget.title")}
                 </h3>
                 <button
                     onClick={() => setIsEditing(!isEditing)}
                     className="text-[10px] text-gray-400 hover:text-[#0FA697] transition-colors"
                 >
-                    {isEditing ? "✓ Done" : "⚙️ Set budget"}
+                    {isEditing ? t("carbonBudget.done") : t("carbonBudget.setBudget")}
                 </button>
             </div>
 
@@ -120,21 +122,21 @@ export default function CarbonBudget() {
                         <span className="text-lg font-black" style={{ color: ringColor }}>
                             {usedPct.toFixed(0)}%
                         </span>
-                        <span className="text-[8px] text-gray-400 dark:text-gray-500">used</span>
+                        <span className="text-[8px] text-gray-400 dark:text-gray-500">{t("carbonBudget.usedCenter")}</span>
                     </div>
                 </div>
 
                 {/* Stats beside ring */}
                 <div className="flex-1 space-y-1.5">
                     <div>
-                        <div className="text-[10px] text-gray-400">Used</div>
+                        <div className="text-[10px] text-gray-400">{t("carbonBudget.used")}</div>
                         <div className="text-sm font-bold text-gray-700 dark:text-gray-200">
                             {totalCO2 < 0.01 ? totalCO2.toExponential(1) : totalCO2.toFixed(4)}g
                             <span className="text-gray-400 dark:text-gray-500 font-normal"> / {carbonBudget}g</span>
                         </div>
                     </div>
                     <div>
-                        <div className="text-[10px] text-gray-400">Remaining</div>
+                        <div className="text-[10px] text-gray-400">{t("carbonBudget.remaining")}</div>
                         <div className="text-sm font-bold" style={{ color: ringColor }}>
                             {remaining < 0.01 ? remaining.toExponential(1) : remaining.toFixed(4)}g
                         </div>
