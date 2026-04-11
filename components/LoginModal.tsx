@@ -74,8 +74,9 @@ export default function LoginModal() {
                 <button
                   onClick={handleGoogleSignIn}
                   disabled={isLoading}
-                  className="w-full group relative flex items-center justify-center gap-3 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:opacity-50 text-slate-900 font-semibold py-3 px-6 rounded-xl transition duration-300 shadow-lg hover:shadow-xl disabled:cursor-not-allowed cursor-pointer hover:scale-105 active:scale-95"
+                  className="w-full group relative flex items-center justify-center gap-3 overflow-hidden rounded-xl bg-slate-800/80 hover:bg-slate-700 backdrop-blur-md border border-slate-600/50 hover:border-slate-400/80 py-3.5 px-6 font-medium text-slate-100 transition-all duration-300 shadow-xl hover:shadow-cyan-500/10 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0"
                 >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                   {/* Google Logo SVG */}
                   <svg
                     className="w-5 h-5 transition-transform group-hover:scale-110"
