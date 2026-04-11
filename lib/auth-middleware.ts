@@ -10,7 +10,7 @@ import { prisma } from "@/lib/prisma";
  * 3. Cho phép/từ chối truy cập
  */
 
-export async function withAuth(
+export function withAuth(
   handler: (req: NextRequest, context: { userId: string }) => Promise<NextResponse>
 ) {
   return async (req: NextRequest) => {

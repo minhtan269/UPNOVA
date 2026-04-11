@@ -44,5 +44,5 @@ async function handler(
 }
 
 // Export protected endpoint
-export const GET = (req: NextRequest) => withAuth(handler)(req);
-export const POST = (req: NextRequest) => withAuth(handler)(req);
+export const GET = withAuth(handler);
+export const POST = withAuth(handler);
