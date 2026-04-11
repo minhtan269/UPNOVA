@@ -235,7 +235,7 @@ export default function AnalyticsPage() {
                                                 backgroundColor: "var(--background)",
                                                 color: "var(--foreground)",
                                             }}
-                                            formatter={(value: number | undefined) => formatNumber(value ?? 0) as any}
+                                            formatter={(value: any) => formatNumber(typeof value === 'number' ? value : parseFloat(value) || 0) as any}
                                         />
                                         <Line type="monotone" dataKey="co2" stroke="#0FA697" strokeWidth={2} dot={{ r: 3 }} name={t("analytics.tableHeaderCO2")} />
                                         <Line type="monotone" dataKey="energy" stroke="#AED911" strokeWidth={2} dot={{ r: 3 }} name={t("analytics.tableHeaderEnergy")} />
@@ -271,7 +271,7 @@ export default function AnalyticsPage() {
                                                 backgroundColor: "var(--background)",
                                                 color: "var(--foreground)",
                                             }}
-                                            formatter={(value: number | undefined) => formatNumber(value ?? 0) as any}
+                                            formatter={(value: any) => formatNumber(typeof value === 'number' ? value : parseFloat(value) || 0) as any}
                                         />
                                     </PieChart>
                                 </ResponsiveContainer>
@@ -303,7 +303,7 @@ export default function AnalyticsPage() {
                                                 backgroundColor: "var(--background)",
                                                 color: "var(--foreground)",
                                             }}
-                                            formatter={(value: number | undefined) => formatNumber(value ?? 0) as any}
+                                            formatter={(value: any) => formatNumber(typeof value === 'number' ? value : parseFloat(value) || 0) as any}
                                         />
                                         <Bar dataKey="tokens" radius={[6, 6, 0, 0]}>
                                             {modelData.map((_, i) => (
@@ -329,7 +329,7 @@ export default function AnalyticsPage() {
                                                 backgroundColor: "var(--background)",
                                                 color: "var(--foreground)",
                                             }}
-                                            formatter={(value: number | undefined) => formatNumber(value ?? 0) as any}
+                                            formatter={(value: any) => formatNumber(typeof value === 'number' ? value : parseFloat(value) || 0) as any}
                                         />
                                         <Area
                                             type="monotone"
