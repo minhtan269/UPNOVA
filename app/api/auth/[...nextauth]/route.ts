@@ -64,8 +64,8 @@ const handler = NextAuth({
         if (session.user) {
           (session.user as any).id = user.id;
           // googleId is already in user object from DB
-          if (user.googleId) {
-            (session.user as any).googleId = user.googleId;
+          if ((user as any).googleId) {
+            (session.user as any).googleId = (user as any).googleId;
           }
         }
         return session;
