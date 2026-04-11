@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage, type StateStorage } from "zustand/middleware";
 import {
     computeMetricsV2,
     computeUserMetrics,
@@ -65,6 +65,10 @@ export interface ResilienceHistoryEntry {
 }
 
 interface ACRMState {
+    // Session management
+    sessionId: string | null;
+    sessionLabel: string;
+
     messages: ChatMessage[];
     selectedModelId: string;
     sessionStats: SessionStats;
@@ -115,6 +119,8 @@ interface ACRMState {
     advisorError: string | null;
 
     // Actions
+    setSessionId: (id: string) => void;
+    setSessionLabel: (label: string) => void;
     setModel: (id: string) => void;
     setRegion: (region: string) => void;
     setCarbonBudget: (grams: number) => void;
@@ -519,6 +525,8 @@ async function handleAIResponse(
 // ---- Store ----
 
 export const useACRMStore = create<ACRMState>()(persist((set, get) => ({
+    sessionId: null,
+    sessionLabel: "",
     messages: [],
     selectedModelId: "gemini-flash",
     sessionStats: {
@@ -554,6 +562,9 @@ export const useACRMStore = create<ACRMState>()(persist((set, get) => ({
     advisorIsGeneratingDraft: false,
     advisorIsAsking: false,
     advisorError: null,
+
+    setSessionId: (id) => set({ sessionId: id }),
+    setSessionLabel: (label) => set({ sessionLabel: label }),
 
     setModel: (id) => set({ selectedModelId: id }),
     setRegion: (region) => {
@@ -622,6 +633,11 @@ export const useACRMStore = create<ACRMState>()(persist((set, get) => ({
 
     clearSession: () =>
         set({
+            // Session metadata
+            sessionId: null,
+            sessionLabel: "",
+            
+            // Chat data
             messages: [],
             sessionStats: {
                 totalCO2: 0,
@@ -928,6 +944,28 @@ export const useACRMStore = create<ACRMState>()(persist((set, get) => ({
     },
 }), {
     name: "acrm-session",
+    storage: createJSONStorage(() => {
+        return {
+            getItem: (name) => {
+                if (typeof window === "undefined") return null;
+                const userId = localStorage.getItem("acrm-last-user-id");
+                const key = userId ? `${name}-${userId}` : name;
+                return localStorage.getItem(key);
+            },
+            setItem: (name, value) => {
+                if (typeof window === "undefined") return;
+                const userId = localStorage.getItem("acrm-last-user-id");
+                const key = userId ? `${name}-${userId}` : name;
+                localStorage.setItem(key, value);
+            },
+            removeItem: (name) => {
+                if (typeof window === "undefined") return;
+                const userId = localStorage.getItem("acrm-last-user-id");
+                const key = userId ? `${name}-${userId}` : name;
+                localStorage.removeItem(key);
+            },
+        };
+    }),
     version: 5,
     migrate: (persistedState: unknown, fromVersion: number) => {
         if (fromVersion < 5) {

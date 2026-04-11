@@ -10,7 +10,11 @@ import type {
     AdvisorSupplementalInput,
 } from "./advisor-types";
 
-const STORAGE_KEY = "acrm-saved-sessions";
+function getStorageKey(): string {
+    if (typeof window === "undefined") return "acrm-saved-sessions";
+    const userId = localStorage.getItem("acrm-last-user-id");
+    return userId ? `acrm-saved-sessions-${userId}` : "acrm-saved-sessions";
+}
 
 export interface SavedSession {
     id: string;
@@ -30,7 +34,7 @@ export interface SavedSession {
 /** Get all saved sessions, sorted newest first */
 export function getSavedSessions(): SavedSession[] {
     try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = localStorage.getItem(getStorageKey());
         if (!raw) return [];
         const sessions: SavedSession[] = JSON.parse(raw);
         return sessions.sort((a, b) => b.savedAt - a.savedAt);
@@ -66,7 +70,7 @@ export function saveCurrentSession(data: {
 
     // Keep max 20 sessions
     const trimmed = sessions.slice(0, 20);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
+    localStorage.setItem(getStorageKey(), JSON.stringify(trimmed));
 
     return session;
 }
@@ -74,10 +78,10 @@ export function saveCurrentSession(data: {
 /** Delete a saved session by ID */
 export function deleteSession(id: string): void {
     const sessions = getSavedSessions().filter((s) => s.id !== id);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+    localStorage.setItem(getStorageKey(), JSON.stringify(sessions));
 }
 
 /** Delete all saved sessions */
 export function clearAllSessions(): void {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(getStorageKey());
 }

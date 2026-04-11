@@ -2,6 +2,7 @@
 
 import ModelSelector from "@/components/ModelSelector";
 import RegionSelector from "@/components/RegionSelector";
+import SessionManager from "@/components/SessionManager";
 import ChatInterface from "@/components/ChatInterface";
 import ResilienceDashboard from "@/components/ResilienceDashboard";
 import GreenHours from "@/components/GreenHours";
@@ -40,11 +41,13 @@ export default function ChatPage() {
                         </div>
                     </div>
 
-                    {/* Center: Model + Region Selectors */}
+                    {/* Center: Model + Region Selectors + Session Manager */}
                     <div className="flex items-center gap-4 flex-wrap justify-center">
                         <ModelSelector />
                         <div className="h-6 w-px bg-gray-200 dark:bg-[#2a2d3a]" />
                         <RegionSelector />
+                        <div className="h-6 w-px bg-gray-200 dark:bg-[#2a2d3a]" />
+                        <SessionManager />
                     </div>
 
                     {/* Right: Toggle Dashboard */}

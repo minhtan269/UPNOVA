@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useACRMStore, type ChatMessage } from "@/lib/store";
+import { useChatSessionSync } from "@/lib/hooks/useChatSessionSync";
 import { AVAILABLE_MODELS } from "@/lib/carbon-constants";
 import CarbonTag from "./CarbonTag";
 import AIResponseRenderer from "./markdown/AIResponseRenderer";
@@ -108,6 +109,9 @@ export default function ChatInterface() {
   const scheduleMessage = useACRMStore((s) => s.scheduleMessage);
   const greenHours = useACRMStore((s) => s.greenHours);
   const isCILive = useACRMStore((s) => s.isCILive);
+
+  // Sync chat session to database
+  useChatSessionSync();
 
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);

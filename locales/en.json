@@ -79,6 +79,13 @@
     "startChat": "💬 Start Chat",
     "compareModels": "⚖️ Compare Models"
   },
+  "login": {
+    "projectName": "ACRM",
+    "welcome": "Welcome!",
+    "subtitle": "Sign in to start managing your carbon footprint and building a sustainable future",
+    "googleSignIn": "Sign in with Google",
+    "processing": "Processing..."
+  },
   "chat": {
     "emptyTitle": "Start a Conversation",
     "emptySubtitle": "Send a message and see the real-time carbon footprint of every AI response.",
@@ -322,6 +329,14 @@
     "title": "🧠 Smart Model Router",
     "switchTo": "Switch to {model}",
     "keepCurrent": "Keep current"
+  },
+  "session": {
+    "newSession": "New Session",
+    "create": "Create",
+    "enterLabel": "Enter session name...",
+    "saveCurrent": "Save Current Session",
+    "noSessions": "No saved sessions yet",
+    "cannotSaveEmpty": "Cannot save an empty session"
   },
   "common": {
     "loading": "Loading...",

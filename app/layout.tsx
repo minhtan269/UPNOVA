@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeScript } from "@/components/ThemeScript";
 import { LanguageProvider } from "@/lib/i18n/context";
+import { AuthProvider } from "@/components/AuthProvider";
+import LoginModal from "@/components/LoginModal";
 
 const inter = Inter({
   variable: "--font-geist-sans",
@@ -29,9 +31,12 @@ export default function RootLayout({
         <ThemeScript />
       </head>
       <body className={`${inter.variable} antialiased`}>
-        <LanguageProvider>
-          {children}
-        </LanguageProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <LoginModal />
+            {children}
+          </LanguageProvider>
+        </AuthProvider>
       </body>
     </html>
   );

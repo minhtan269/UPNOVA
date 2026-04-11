@@ -79,6 +79,13 @@
     "startChat": "💬 Bắt đầu Chat",
     "compareModels": "⚖️ So sánh Mô hình"
   },
+  "login": {
+    "projectName": "ACRM",
+    "welcome": "Chào mừng bạn!",
+    "subtitle": "Đăng nhập để bắt đầu quản lý carbon footprint và tạo dựng tương lai bền vững",
+    "googleSignIn": "Đăng nhập với Google",
+    "processing": "Đang xử lý..."
+  },
   "chat": {
     "emptyTitle": "Bắt đầu Cuộc trò chuyện",
     "emptySubtitle": "Gửi tin nhắn và xem lượng carbon thời gian thực của mỗi phản hồi AI.",
@@ -331,6 +338,14 @@
     "title": "🧠 Bộ định tuyến mô hình thông minh",
     "switchTo": "Chuyển sang {model}",
     "keepCurrent": "Giữ nguyên"
+  },
+  "session": {
+    "newSession": "Phiên mới",
+    "create": "Tạo",
+    "enterLabel": "Nhập tên phiên...",
+    "saveCurrent": "Lưu phiên hiện tại",
+    "noSessions": "Chưa có phiên được lưu",
+    "cannotSaveEmpty": "Không thể lưu phiên trống"
   },
   "common": {
     "loading": "Đang tải...",
